@@ -57,15 +57,15 @@
       </div>
 
       <div class="flex gap-3">
-        <%= link_to "Check Errors", telemetry_errors_vehicles_path,
+        <%= link_to "Check Errors", errors_vehicle_telemetry_path(@vehicle),
                     class: "bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 font-medium" %>
         <% if @vehicle.telemetry_active %>
-          <%= button_to "Stop Telemetry", stop_telemetry_vehicle_path(@vehicle),
-                        method: :post,
+          <%= button_to "Stop Telemetry", vehicle_telemetry_path(@vehicle),
+                        method: :delete,
                         data: { confirm: "Are you sure you want to stop telemetry streaming?" },
                         class: "bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 font-medium" %>
         <% else %>
-          <%= button_to "Start Telemetry", start_telemetry_vehicle_path(@vehicle),
+          <%= button_to "Start Telemetry", vehicle_telemetry_path(@vehicle),
                         method: :post,
                         class: "bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 font-medium" %>
         <% end %>
