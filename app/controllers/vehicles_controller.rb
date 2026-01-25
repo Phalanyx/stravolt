@@ -1,12 +1,33 @@
 class VehiclesController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_vehicle, only: [:show, :refresh, :start_telemetry, :stop_telemetry]
+  before_action :set_vehicle, only: [:show, :refresh, :start_telemetry, :stop_telemetry,
+                                      :lock, :unlock, :flash_lights, :honk_horn,
+                                      :start_climate, :stop_climate, :start_charging, :stop_charging]
 
   def index
     # Auto-sync vehicles if user has none
     initialize_vehicles if current_user.vehicles.empty?
 
     @vehicles = current_user.vehicles.ordered_by_name
+  end
+
+  def telemetry_errors
+    service = TeslaFleetService.new(current_user)
+    @vehicles = current_user.vehicles.ordered_by_name
+    @errors_by_vehicle = {}
+
+    # Fetch errors for each vehicle
+    @vehicles.each do |vehicle|
+      begin
+        @errors_by_vehicle[vehicle.id] = service.fetch_vehicle_telemetry_errors(vehicle)
+      rescue => e
+        Rails.logger.error("Error fetching telemetry errors for vehicle #{vehicle.id}: #{e.message}")
+        @errors_by_vehicle[vehicle.id] = { 'error' => e.message }
+      end
+    end
+  rescue => e
+    Rails.logger.error("Unexpected error fetching telemetry errors: #{e.message}")
+    redirect_to vehicles_path, alert: "Unable to fetch telemetry errors."
   end
 
   def show
@@ -77,6 +98,95 @@ class VehiclesController < ApplicationController
   rescue => e
     Rails.logger.error("Error stopping telemetry for vehicle #{@vehicle.id}: #{e.message}")
     redirect_to @vehicle, alert: "Unable to stop telemetry streaming."
+  end
+
+  # Vehicle command actions
+  def lock
+    command_client = VehicleCommandClient.new(current_user)
+    command_client.lock_doors(@vehicle)
+    redirect_to @vehicle, notice: "Vehicle locked successfully"
+  rescue TeslaFleetErrors::VehicleAsleepError
+    redirect_to @vehicle, alert: "Vehicle is asleep. Wake it up first."
+  rescue => e
+    Rails.logger.error("Error locking vehicle #{@vehicle.id}: #{e.message}")
+    redirect_to @vehicle, alert: "Unable to lock vehicle."
+  end
+
+  def unlock
+    command_client = VehicleCommandClient.new(current_user)
+    command_client.unlock_doors(@vehicle)
+    redirect_to @vehicle, notice: "Vehicle unlocked successfully"
+  rescue TeslaFleetErrors::VehicleAsleepError
+    redirect_to @vehicle, alert: "Vehicle is asleep. Wake it up first."
+  rescue => e
+    Rails.logger.error("Error unlocking vehicle #{@vehicle.id}: #{e.message}")
+    redirect_to @vehicle, alert: "Unable to unlock vehicle."
+  end
+
+  def flash_lights
+    command_client = VehicleCommandClient.new(current_user)
+    command_client.flash_lights(@vehicle)
+    redirect_to @vehicle, notice: "Lights flashed successfully"
+  rescue TeslaFleetErrors::VehicleAsleepError
+    redirect_to @vehicle, alert: "Vehicle is asleep. Wake it up first."
+  rescue => e
+    Rails.logger.error("Error flashing lights on vehicle #{@vehicle.id}: #{e.message}")
+    redirect_to @vehicle, alert: "Unable to flash lights."
+  end
+
+  def honk_horn
+    command_client = VehicleCommandClient.new(current_user)
+    command_client.honk_horn(@vehicle)
+    redirect_to @vehicle, notice: "Horn honked successfully"
+  rescue TeslaFleetErrors::VehicleAsleepError
+    redirect_to @vehicle, alert: "Vehicle is asleep. Wake it up first."
+  rescue => e
+    Rails.logger.error("Error honking horn on vehicle #{@vehicle.id}: #{e.message}")
+    redirect_to @vehicle, alert: "Unable to honk horn."
+  end
+
+  def start_climate
+    command_client = VehicleCommandClient.new(current_user)
+    command_client.start_climate(@vehicle)
+    redirect_to @vehicle, notice: "Climate control started successfully"
+  rescue TeslaFleetErrors::VehicleAsleepError
+    redirect_to @vehicle, alert: "Vehicle is asleep. Wake it up first."
+  rescue => e
+    Rails.logger.error("Error starting climate on vehicle #{@vehicle.id}: #{e.message}")
+    redirect_to @vehicle, alert: "Unable to start climate control."
+  end
+
+  def stop_climate
+    command_client = VehicleCommandClient.new(current_user)
+    command_client.stop_climate(@vehicle)
+    redirect_to @vehicle, notice: "Climate control stopped successfully"
+  rescue TeslaFleetErrors::VehicleAsleepError
+    redirect_to @vehicle, alert: "Vehicle is asleep. Wake it up first."
+  rescue => e
+    Rails.logger.error("Error stopping climate on vehicle #{@vehicle.id}: #{e.message}")
+    redirect_to @vehicle, alert: "Unable to stop climate control."
+  end
+
+  def start_charging
+    command_client = VehicleCommandClient.new(current_user)
+    command_client.start_charging(@vehicle)
+    redirect_to @vehicle, notice: "Charging started successfully"
+  rescue TeslaFleetErrors::VehicleAsleepError
+    redirect_to @vehicle, alert: "Vehicle is asleep. Wake it up first."
+  rescue => e
+    Rails.logger.error("Error starting charging on vehicle #{@vehicle.id}: #{e.message}")
+    redirect_to @vehicle, alert: "Unable to start charging."
+  end
+
+  def stop_charging
+    command_client = VehicleCommandClient.new(current_user)
+    command_client.stop_charging(@vehicle)
+    redirect_to @vehicle, notice: "Charging stopped successfully"
+  rescue TeslaFleetErrors::VehicleAsleepError
+    redirect_to @vehicle, alert: "Vehicle is asleep. Wake it up first."
+  rescue => e
+    Rails.logger.error("Error stopping charging on vehicle #{@vehicle.id}: #{e.message}")
+    redirect_to @vehicle, alert: "Unable to stop charging."
   end
 
   private

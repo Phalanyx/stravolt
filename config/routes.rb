@@ -25,10 +25,22 @@ Rails.application.routes.draw do
 
   # Vehicles management (requires login)
   resources :vehicles, only: [:index, :show] do
+    collection do
+      get :telemetry_errors
+    end
     member do
       post :refresh
       post :start_telemetry
       post :stop_telemetry
+      # Vehicle commands
+      post :lock
+      post :unlock
+      post :flash_lights
+      post :honk_horn
+      post :start_climate
+      post :stop_climate
+      post :start_charging
+      post :stop_charging
     end
   end
 

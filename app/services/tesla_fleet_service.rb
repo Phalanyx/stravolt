@@ -2,6 +2,7 @@ class TeslaFleetService
   include TeslaFleetErrors
 
   FLEET_API_URL = 'https://fleet-api.prd.na.vn.cloud.tesla.com'
+  PROXY_URL = 'https://localhost:4443'
 
   def initialize(user)
     @user = user
@@ -24,7 +25,12 @@ class TeslaFleetService
     token = @user.ensure_valid_tesla_token
     raise TokenExpiredError, "Unable to refresh Tesla token" unless token.present?
 
-    conn = Faraday.new(url: FLEET_API_URL) do |f|
+    # Use vehicle-command proxy for wake_up command
+    ssl_options = {
+      verify: false # Self-signed cert for local development
+    }
+
+    conn = Faraday.new(url: PROXY_URL, ssl: ssl_options) do |f|
       f.response :json
       f.adapter Faraday.default_adapter
     end
@@ -51,7 +57,12 @@ class TeslaFleetService
     token = @user.ensure_valid_tesla_token
     raise TokenExpiredError, "Unable to refresh Tesla token" unless token.present?
 
-    conn = Faraday.new(url: FLEET_API_URL) do |f|
+    # Use vehicle-command proxy for telemetry configuration
+    ssl_options = {
+      verify: false # Self-signed cert for local development
+    }
+
+    conn = Faraday.new(url: PROXY_URL, ssl: ssl_options) do |f|
       f.response :json
       f.adapter Faraday.default_adapter
     end
@@ -81,7 +92,12 @@ class TeslaFleetService
     token = @user.ensure_valid_tesla_token
     raise TokenExpiredError, "Unable to refresh Tesla token" unless token.present?
 
-    conn = Faraday.new(url: FLEET_API_URL) do |f|
+    # Use vehicle-command proxy for telemetry configuration
+    ssl_options = {
+      verify: false # Self-signed cert for local development
+    }
+
+    conn = Faraday.new(url: PROXY_URL, ssl: ssl_options) do |f|
       f.response :json
       f.adapter Faraday.default_adapter
     end
@@ -109,7 +125,12 @@ class TeslaFleetService
     token = @user.ensure_valid_tesla_token
     raise TokenExpiredError, "Unable to refresh Tesla token" unless token.present?
 
-    conn = Faraday.new(url: FLEET_API_URL) do |f|
+    # Use vehicle-command proxy for telemetry configuration
+    ssl_options = {
+      verify: false # Self-signed cert for local development
+    }
+
+    conn = Faraday.new(url: PROXY_URL, ssl: ssl_options) do |f|
       f.response :json
       f.adapter Faraday.default_adapter
     end
@@ -129,6 +150,39 @@ class TeslaFleetService
   rescue Faraday::Error => e
     Rails.logger.error("Error deleting telemetry config: #{e.message}")
     false
+  end
+
+  # GET telemetry errors for a specific vehicle
+  def fetch_vehicle_telemetry_errors(vehicle)
+    token = @user.ensure_valid_tesla_token
+    raise TokenExpiredError, "Unable to refresh Tesla token" unless token.present?
+
+    # Use vehicle-command proxy for vehicle-specific telemetry errors
+    ssl_options = {
+      verify: false # Self-signed cert for local development
+    }
+
+    conn = Faraday.new(url: PROXY_URL, ssl: ssl_options) do |f|
+      f.response :json
+      f.adapter Faraday.default_adapter
+    end
+
+    response = conn.get("/api/1/vehicles/#{vehicle.vin}/fleet_telemetry_errors") do |req|
+      req.headers['Authorization'] = "Bearer #{token}"
+      req.headers['Content-Type'] = 'application/json'
+    end
+
+    if response.status == 200
+      response.body
+    elsif response.status == 404
+      { 'response' => { 'errors' => [] } } # No errors found
+    else
+      Rails.logger.error("Failed to fetch telemetry errors for #{vehicle.vin}: #{response.status} - #{response.body}")
+      raise TeslaFleetError, "Failed to fetch telemetry errors: #{response.status}"
+    end
+  rescue Faraday::Error => e
+    Rails.logger.error("Error fetching telemetry errors: #{e.message}")
+    raise ApiUnavailableError, "Tesla API is temporarily unavailable"
   end
 
   private
