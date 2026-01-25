@@ -9,6 +9,49 @@
 <div class="bg-white rounded-lg shadow-sm p-6">
   <h2 class="text-xl font-semibold text-gray-900 mb-4">Location</h2>
 
+  <% if latitude.present? && longitude.present? %>
+    <!-- Google Maps Embed -->
+    <div class="mb-4 rounded-lg overflow-hidden border border-gray-200" style="height: 300px;">
+      <div id="map-<%= vehicle_data.object_id %>" class="w-full h-full"></div>
+    </div>
+
+    <script>
+      (function() {
+        function initMap() {
+          const position = { lat: <%= latitude %>, lng: <%= longitude %> };
+          const map = new google.maps.Map(document.getElementById('map-<%= vehicle_data.object_id %>'), {
+            zoom: 15,
+            center: position,
+            mapTypeId: 'roadmap'
+          });
+
+          // Add marker for vehicle
+          const marker = new google.maps.Marker({
+            position: position,
+            map: map,
+            title: 'Vehicle Location',
+            icon: {
+              path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+              scale: 6,
+              fillColor: '#3B82F6',
+              fillOpacity: 1,
+              strokeColor: '#1E40AF',
+              strokeWeight: 2,
+              rotation: <%= heading || 0 %>
+            }
+          });
+        }
+
+        // Load map when Google Maps API is ready
+        if (window.google && window.google.maps) {
+          initMap();
+        } else {
+          window.addEventListener('google-maps-loaded', initMap);
+        }
+      })();
+    </script>
+  <% end %>
+
   <div class="space-y-3">
     <div class="flex justify-between">
       <span class="text-sm text-gray-600">Latitude</span>

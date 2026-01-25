@@ -7,7 +7,17 @@ class TelemetryConfigBuilder
         "port" => 443,
         "ca" => ENV['TELEMETRY_CHAIN'], # Certificate chain from environment
         "fields" => {
-          "Soc" => { "interval_seconds" => 30 }
+          # Gear state (Drive/Park/Reverse/Neutral) - triggers on state changes
+          "Gear" => { "interval_seconds" => 1 },
+
+          # Location updates when vehicle moves
+          "Location" => { "interval_seconds" => 5 },
+
+          # Battery state of charge - only sends when value changes
+          "Soc" => { "interval_seconds" => 60 },
+
+          # Vehicle speed to track movement
+          "VehicleSpeed" => { "interval_seconds" => 5 }
         }
       }
     }
