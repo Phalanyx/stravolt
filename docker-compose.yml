@@ -1,0 +1,17 @@
+version: "3"
+services:
+
+
+  postgres:
+    # this image is just postgres with pgvector installed
+    image: pgvector/pgvector:pg16
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: stravolt_development
+      POSTGRES_HOST_AUTH_METHOD: trust
+  redis:
+    image: library/redis:7-alpine
+    ports:
+      - 6379:6379

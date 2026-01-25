@@ -1,0 +1,5 @@
+# Auto-reload Rails server when .env, lib/, or initializers change
+# If watchexec is not installed: brew install watchexec (macOS)
+# This watches for changes in .env, lib/ directory, and config/initializers/
+web: bin/rails server  
+css: bin/rails tailwindcss:watch
