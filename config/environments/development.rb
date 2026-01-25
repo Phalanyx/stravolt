@@ -10,7 +10,7 @@ Rails.application.configure do
   config.eager_load = false
 
   # Allow ngrok hosts for OAuth callback testing
-  config.hosts << /[a-z0-9-]+\.ngrok-free\.app/
+  config.hosts << "stravolt.brokebesties.ca" 
 
   # Show full error reports.
   config.consider_all_requests_local = true
