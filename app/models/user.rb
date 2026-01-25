@@ -26,4 +26,9 @@ class User < ApplicationRecord
     return false unless access_token.present? && token_expires_at.present?
     token_expires_at > 1.minute.from_now
   end
+
+  # Check if user has a vehicle configured
+  def has_vehicle_configured?
+    tesla_vehicle_id.present?
+  end
 end

@@ -23,6 +23,9 @@ Rails.application.routes.draw do
   # Dashboard (requires login)
   get "/dashboard", to: "dashboard#index"
 
+  # Settings (requires login)
+  get "/settings", to: "settings#index"
+
   # Tesla Partner Account Registration
   namespace :tesla do
     post "partner/register", to: "partner#register"

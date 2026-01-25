@@ -1,0 +1,36 @@
+<div class="bg-white rounded-lg shadow-sm p-6">
+  <h2 class="text-xl font-semibold text-gray-900 mb-4">Battery Status</h2>
+
+  <div class="space-y-4">
+    <!-- Battery percentage with progress bar -->
+    <div>
+      <div class="flex justify-between mb-2">
+        <span class="text-sm font-medium text-gray-700">Battery Level</span>
+        <span class="text-sm font-bold text-gray-900">
+          <%= @vehicle_data.dig('charge_state', 'battery_level')&.round || 'N/A' %>%
+        </span>
+      </div>
+      <div class="w-full bg-gray-200 rounded-full h-4">
+        <div class="bg-green-500 h-4 rounded-full transition-all"
+             style="width: <%= @vehicle_data.dig('charge_state', 'battery_level')&.round || 0 %>%">
+        </div>
+      </div>
+    </div>
+
+    <!-- Range -->
+    <div class="flex justify-between">
+      <span class="text-sm text-gray-600">Range Remaining</span>
+      <span class="text-sm font-semibold text-gray-900">
+        <%= @vehicle_data.dig('charge_state', 'battery_range')&.round || 'N/A' %> mi
+      </span>
+    </div>
+
+    <!-- Charging state -->
+    <div class="flex justify-between">
+      <span class="text-sm text-gray-600">Status</span>
+      <span class="text-sm font-semibold text-green-600">
+        <%= @vehicle_data.dig('charge_state', 'charging_state')&.titleize || 'Unknown' %>
+      </span>
+    </div>
+  </div>
+</div>

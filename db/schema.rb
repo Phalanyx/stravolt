@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_25_040440) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_25_142309) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -24,10 +24,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_25_040440) do
     t.datetime "reset_password_sent_at"
     t.string "reset_password_token"
     t.integer "tesla_status", default: 0, null: false
+    t.jsonb "tesla_vehicle_cached_data"
+    t.string "tesla_vehicle_id"
+    t.string "tesla_vehicle_name"
+    t.string "tesla_vehicle_vin"
     t.datetime "token_expires_at"
     t.datetime "updated_at", null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["tesla_status"], name: "index_users_on_tesla_status"
+    t.index ["tesla_vehicle_id"], name: "index_users_on_tesla_vehicle_id"
   end
 end

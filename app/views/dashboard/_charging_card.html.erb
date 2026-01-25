@@ -1,0 +1,26 @@
+<div class="bg-white rounded-lg shadow-sm p-6">
+  <h2 class="text-xl font-semibold text-gray-900 mb-4">Charging Details</h2>
+
+  <div class="space-y-3">
+    <div class="flex justify-between">
+      <span class="text-sm text-gray-600">Charge Rate</span>
+      <span class="text-sm font-semibold text-gray-900">
+        <%= @vehicle_data.dig('charge_state', 'charge_rate')&.round(1) || 'N/A' %> mi/hr
+      </span>
+    </div>
+
+    <div class="flex justify-between">
+      <span class="text-sm text-gray-600">Energy Added</span>
+      <span class="text-sm font-semibold text-gray-900">
+        <%= @vehicle_data.dig('charge_state', 'charge_energy_added')&.round(1) || 'N/A' %> kWh
+      </span>
+    </div>
+
+    <div class="flex justify-between">
+      <span class="text-sm text-gray-600">Time to Full</span>
+      <span class="text-sm font-semibold text-gray-900">
+        <%= @vehicle_data.dig('charge_state', 'time_to_full_charge')&.round(1) || 'N/A' %> hrs
+      </span>
+    </div>
+  </div>
+</div>
