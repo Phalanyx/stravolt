@@ -1,9 +1,16 @@
 <div class="max-w-6xl mx-auto">
   <div class="flex items-center justify-between mb-8">
-    <h1 class="text-4xl font-bold text-gray-900">Dashboard</h1>
+    <div>
+      <h1 class="text-4xl font-bold text-gray-900">Dashboard</h1>
+      <% if @vehicle_data && current_user.updated_at %>
+        <p class="text-sm text-gray-600 mt-1">
+          Updated <%= time_ago_in_words(current_user.updated_at) %> ago
+        </p>
+      <% end %>
+    </div>
     <% if @vehicle_data %>
-      <%= button_to "Refresh Stats", dashboard_path, method: :get,
-                    class: "bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" %>
+      <%= link_to "Refresh Stats", dashboard_path(refresh: true),
+                  class: "bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" %>
     <% end %>
   </div>
 

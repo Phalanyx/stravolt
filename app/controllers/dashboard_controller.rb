@@ -7,8 +7,13 @@ class DashboardController < ApplicationController
     # Initialize vehicle on first load
     initialize_vehicle unless current_user.has_vehicle_configured?
 
-    # Fetch stats if vehicle configured
-    fetch_vehicle_stats if current_user.has_vehicle_configured?
+    # Only fetch new stats if explicitly requested via refresh parameter
+    if params[:refresh] == 'true' && current_user.has_vehicle_configured?
+      fetch_vehicle_stats
+    else
+      # Load cached data from database
+      @vehicle_data = current_user.tesla_vehicle_cached_data
+    end
 
   rescue TeslaFleetErrors::VehicleAsleepError => e
     # Attempt to wake the vehicle
@@ -18,11 +23,15 @@ class DashboardController < ApplicationController
     else
       @error = "Your vehicle is asleep and could not be woken up. Try again from the Tesla app."
     end
+    # Show cached data even if vehicle is asleep
+    @vehicle_data = current_user.tesla_vehicle_cached_data
   rescue TeslaFleetErrors::ApiUnavailableError
     @error = "Tesla API is temporarily unavailable. Showing cached data."
+    @vehicle_data = current_user.tesla_vehicle_cached_data
   rescue => e
     Rails.logger.error("Dashboard error: #{e.message}")
     @error = "Unable to fetch vehicle data."
+    @vehicle_data = current_user.tesla_vehicle_cached_data
   end
 
   private
@@ -41,6 +50,11 @@ class DashboardController < ApplicationController
 
   def fetch_vehicle_stats
     service = TeslaFleetService.new(current_user)
-    @vehicle_data = service.fetch_vehicle_data(current_user.tesla_vehicle_id)
+    data = service.fetch_vehicle_data(current_user.tesla_vehicle_id)
+
+    # Store in database (updated_at will be set automatically)
+    current_user.update!(tesla_vehicle_cached_data: data)
+
+    @vehicle_data = data
   end
 end

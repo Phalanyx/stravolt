@@ -2,7 +2,6 @@ class TeslaFleetService
   include TeslaFleetErrors
 
   FLEET_API_URL = 'https://fleet-api.prd.na.vn.cloud.tesla.com'
-  CACHE_TTL = 30.seconds
 
   def initialize(user)
     @user = user
@@ -10,31 +9,14 @@ class TeslaFleetService
 
   # GET list of user's vehicles
   def fetch_vehicles
-    with_caching('tesla_vehicles', CACHE_TTL) do
-      make_request('/api/1/vehicles')
-    end
+    make_request('/api/1/vehicles')
   end
 
   # GET comprehensive vehicle data
   def fetch_vehicle_data(vehicle_id)
-    with_caching("tesla_vehicle_#{vehicle_id}", CACHE_TTL) do
-      # Request specific endpoints including location_data
-      endpoints = "charge_state;drive_state;location_data;vehicle_state"
-      data = make_request("/api/1/vehicles/#{vehicle_id}/vehicle_data?endpoints=#{endpoints}")
-
-      # Cache to database for offline fallback
-      @user.update(tesla_vehicle_cached_data: data)
-
-      data
-    end
-  rescue TeslaFleetError => e
-    # Return cached data if available
-    if @user.tesla_vehicle_cached_data.present?
-      Rails.logger.info("Returning cached vehicle data due to error: #{e.message}")
-      @user.tesla_vehicle_cached_data
-    else
-      raise
-    end
+    # Request specific endpoints including location_data
+    endpoints = "charge_state;drive_state;location_data;vehicle_state"
+    make_request("/api/1/vehicles/#{vehicle_id}/vehicle_data?endpoints=#{endpoints}")
   end
 
   # POST wake up vehicle
@@ -102,17 +84,5 @@ class TeslaFleetService
     else
       raise TeslaFleetError, "Unexpected response: #{response.status}"
     end
-  end
-
-  def with_caching(key, ttl, &block)
-    cache_key = "tesla_fleet:#{@user.id}:#{key}"
-
-    Rails.cache.fetch(cache_key, expires_in: ttl) do
-      block.call
-    end
-  end
-
-  def fleet_api_url
-    FLEET_API_URL
   end
 end
