@@ -1,6 +1,9 @@
 class User < ApplicationRecord
   include TeslaAuthenticable
 
+  # Associations
+  has_many :vehicles, dependent: :destroy
+
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
@@ -29,6 +32,7 @@ class User < ApplicationRecord
 
   # Check if user has a vehicle configured
   def has_vehicle_configured?
-    tesla_vehicle_id.present?
+    vehicles.exists?
   end
+  alias_method :has_vehicles?, :has_vehicle_configured?
 end

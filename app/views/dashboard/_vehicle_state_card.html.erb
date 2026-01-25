@@ -5,13 +5,13 @@
     <div class="flex justify-between">
       <span class="text-sm text-gray-600">Vehicle Name</span>
       <span class="text-sm font-semibold text-gray-900">
-        <%= current_user.tesla_vehicle_name || 'Tesla' %>
+        <%= vehicle_name || 'Tesla' %>
       </span>
     </div>
 
     <div class="flex justify-between items-center">
       <span class="text-sm text-gray-600">Lock Status</span>
-      <% if @vehicle_data.dig('vehicle_state', 'locked') %>
+      <% if vehicle_data.dig('vehicle_state', 'locked') %>
         <span class="text-sm font-semibold text-green-600">Locked</span>
       <% else %>
         <span class="text-sm font-semibold text-yellow-600">Unlocked</span>
@@ -21,7 +21,7 @@
     <div class="flex justify-between">
       <span class="text-sm text-gray-600">Odometer</span>
       <span class="text-sm font-semibold text-gray-900">
-        <%= number_with_delimiter(@vehicle_data.dig('vehicle_state', 'odometer')&.round) || 'N/A' %> mi
+        <%= number_with_delimiter(vehicle_data.dig('vehicle_state', 'odometer')&.round) || 'N/A' %> mi
       </span>
     </div>
   </div>

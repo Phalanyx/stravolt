@@ -2,16 +2,20 @@
   <div class="flex items-center justify-between mb-8">
     <div>
       <h1 class="text-4xl font-bold text-gray-900">Dashboard</h1>
-      <% if @vehicle_data && current_user.updated_at %>
+      <% if @vehicle && @vehicle.updated_at %>
         <p class="text-sm text-gray-600 mt-1">
-          Updated <%= time_ago_in_words(current_user.updated_at) %> ago
+          Updated <%= time_ago_in_words(@vehicle.updated_at) %> ago
         </p>
       <% end %>
     </div>
-    <% if @vehicle_data %>
-      <%= link_to "Refresh Stats", dashboard_path(refresh: true),
-                  class: "bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" %>
-    <% end %>
+    <div class="flex gap-3">
+      <% if @vehicle %>
+        <%= link_to "View All Vehicles", vehicles_path,
+                    class: "bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700" %>
+        <%= link_to "Refresh Stats", dashboard_path(refresh: true),
+                    class: "bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" %>
+      <% end %>
+    </div>
   </div>
 
   <% if @error %>
@@ -54,11 +58,11 @@
     </div>
   <% elsif @vehicle_data %>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <%= render 'battery_card' %>
-      <%= render 'location_card' %>
-      <%= render 'vehicle_state_card' %>
+      <%= render 'battery_card', vehicle_data: @vehicle_data %>
+      <%= render 'location_card', vehicle_data: @vehicle_data %>
+      <%= render 'vehicle_state_card', vehicle_data: @vehicle_data, vehicle_name: @vehicle&.display_name %>
       <% if @vehicle_data.dig('charge_state', 'charging_state') == 'Charging' %>
-        <%= render 'charging_card' %>
+        <%= render 'charging_card', vehicle_data: @vehicle_data %>
       <% end %>
     </div>
   <% end %>

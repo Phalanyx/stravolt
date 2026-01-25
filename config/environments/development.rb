@@ -11,6 +11,7 @@ Rails.application.configure do
 
   # Allow ngrok hosts for OAuth callback testing
   config.hosts << "stravolt.brokebesties.ca" 
+  config.hosts << "stravolt.com"
 
   # Show full error reports.
   config.consider_all_requests_local = true

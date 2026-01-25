@@ -24,7 +24,7 @@ class Tesla::PartnerController < ApplicationController
     response = conn.post('/api/1/partner_accounts') do |req|
       req.headers['Authorization'] = "Bearer #{partner_token}"
       req.headers['Content-Type'] = 'application/json'
-      req.body = { domain: domain }
+      req.body = { domain: domain, csr: "-----BEGIN CERTIFICATE REQUEST-----MIHRMHkCAQAwFzEVMBMGA1UEAwwMc3RyYXZvbHQuY29tMFkwEwYHKoZIzj0CAQYI\nKoZIzj0DAQcDQgAEpf55akcdr8azDtkVeXLBGay+hYZmnF5H378Qi9gzADgzVBjO\n beO2cVH+BI4REY7guo8Kkst6rnbn8hQwpVPUIKAAMAoGCCqGSM49BAMCA0gAMEUC\nIQDfnrTD7MBr5UCiO3x34n7uQLuvW6y80veDyJSf7kbnPwIgbepeKqAFbrjXxFOQ\nWoa8Xv+xMBnaubpVBro4WnonPl0=\n-----END CERTIFICATE REQUEST-----\n" }
     end
 
     if response.success?

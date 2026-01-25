@@ -1,6 +1,6 @@
 <%
   # Location data can be in either 'location_data' or 'drive_state'
-  location = @vehicle_data['location_data'] || @vehicle_data['drive_state'] || {}
+  location = vehicle_data['location_data'] || vehicle_data['drive_state'] || {}
   latitude = location['latitude']
   longitude = location['longitude']
   heading = location['heading']

@@ -23,6 +23,15 @@ Rails.application.routes.draw do
   # Dashboard (requires login)
   get "/dashboard", to: "dashboard#index"
 
+  # Vehicles management (requires login)
+  resources :vehicles, only: [:index, :show] do
+    member do
+      post :refresh
+      post :start_telemetry
+      post :stop_telemetry
+    end
+  end
+
   # Settings (requires login)
   get "/settings", to: "settings#index"
 
