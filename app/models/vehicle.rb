@@ -1,5 +1,7 @@
 class Vehicle < ApplicationRecord
   belongs_to :user
+  has_many :trips, dependent: :destroy
+  belongs_to :active_trip, class_name: 'Trip', optional: true
 
   validates :tesla_vehicle_id, presence: true, uniqueness: { scope: :user_id }
   validates :vin, presence: true, format: { with: /\A[A-HJ-NPR-Z0-9]{17}\z/ }
@@ -7,6 +9,7 @@ class Vehicle < ApplicationRecord
 
   scope :with_telemetry_active, -> { where(telemetry_active: true) }
   scope :ordered_by_name, -> { order(:display_name) }
+  scope :with_active_trip, -> { where.not(active_trip_id: nil) }
 
   def cached_data_stale?
     updated_at < 5.minutes.ago
@@ -19,5 +22,9 @@ class Vehicle < ApplicationRecord
   def telemetry_status
     return "Inactive" unless telemetry_active
     telemetry_synced ? "Active (Synced)" : "Active (Pending Sync)"
+  end
+
+  def has_active_trip?
+    active_trip_id.present?
   end
 end
