@@ -1,10 +1,11 @@
 class TelemetryIngestService
-  attr_reader :vin, :timestamp, :data, :vehicle, :errors
+  attr_reader :vin, :timestamp, :data, :metadata, :vehicle, :errors
 
   def initialize(params)
     @vin = params[:vin]
-    @timestamp = params[:timestamp]
+    @metadata = params[:metadata] || {}
     @data = params[:data] || {}
+    @timestamp = extract_timestamp(params)
     @errors = []
   end
 
@@ -155,5 +156,20 @@ class TelemetryIngestService
   def extract_speed
     speed = data[:VehicleSpeed] || data['VehicleSpeed'] || 0
     speed.to_f
+  end
+
+  # Extract timestamp from params, metadata, or data
+  def extract_timestamp(params)
+    # Priority: top-level timestamp > data.CreatedAt > metadata.receivedat
+    params[:timestamp] ||
+      data[:CreatedAt] || data['CreatedAt'] ||
+      convert_receivedat(metadata[:receivedat] || metadata['receivedat'])
+  end
+
+  # Convert receivedat (milliseconds since epoch) to ISO8601 string
+  def convert_receivedat(receivedat)
+    return nil if receivedat.blank?
+
+    Time.at(receivedat.to_i / 1000).utc.iso8601
   end
 end

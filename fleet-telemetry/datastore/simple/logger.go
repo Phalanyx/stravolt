@@ -1,7 +1,11 @@
 package simple
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"os"
 
 	"github.com/teslamotors/fleet-telemetry/datastore/simple/transformers"
 	logrus "github.com/teslamotors/fleet-telemetry/logger"
@@ -13,17 +17,28 @@ import (
 type Config struct {
 	// Verbose controls whether types are explicitly shown in the logs. Only applicable for record type 'V'.
 	Verbose bool `json:"verbose"`
+	// APIEndpoint is the URL to send telemetry data to (optional, defaults to env var STRAVOLT_API_ENDPOINT)
+	APIEndpoint string `json:"api_endpoint"`
+	// BearerToken is the authentication token (optional, defaults to env var STRAVOLT_BEARER_TOKEN)
+	BearerToken string `json:"bearer_token"`
 }
 
 // Producer is a simple protobuf logger
 type Producer struct {
-	Config *Config
-	logger *logrus.Logger
+	Config     *Config
+	logger     *logrus.Logger
+	httpClient *http.Client
 }
 
 // NewProtoLogger initializes the parameters for protobuf payload logging
 func NewProtoLogger(config *Config, logger *logrus.Logger) telemetry.Producer {
-	return &Producer{Config: config, logger: logger}
+	config.APIEndpoint = os.Getenv("STRAVOLT_API_ENDPOINT")
+	config.BearerToken = os.Getenv("STRAVOLT_BEARER_TOKEN")
+	return &Producer{
+		Config:     config,
+		logger:     logger,
+		httpClient: &http.Client{},
+	}
 }
 
 // Close the producer
@@ -42,7 +57,42 @@ func (p *Producer) Produce(entry *telemetry.Record) {
 		p.logger.ErrorLog("record_logging_error", err, logrus.LogInfo{"vin": entry.Vin, "txtype": entry.TxType, "metadata": entry.Metadata()})
 		return
 	}
-	p.logger.ActivityLog("record_payload", logrus.LogInfo{"vin": entry.Vin, "metadata": entry.Metadata(), "data": data})
+
+	// Prepare the JSON payload
+	payload := map[string]interface{}{
+		"vin":      entry.Vin,
+		"metadata": entry.Metadata(),
+		"data":     data,
+	}
+
+	jsonData, err := json.Marshal(payload)
+	if err != nil {
+		p.logger.ErrorLog("json_marshal_error", err, logrus.LogInfo{"vin": entry.Vin})
+		return
+	}
+
+	// Send HTTP POST request to API endpoint
+	req, err := http.NewRequest("POST", p.Config.APIEndpoint, bytes.NewBuffer(jsonData))
+	if err != nil {
+		p.logger.ErrorLog("http_request_creation_error", err, logrus.LogInfo{"vin": entry.Vin})
+		return
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+p.Config.BearerToken)
+
+	resp, err := p.httpClient.Do(req)
+	if err != nil {
+		p.logger.ErrorLog("http_request_error", err, logrus.LogInfo{"vin": entry.Vin, "endpoint": p.Config.APIEndpoint})
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		p.logger.ActivityLog("record_sent_successfully", logrus.LogInfo{"vin": entry.Vin, "status": resp.StatusCode})
+	} else {
+		p.logger.ErrorLog("http_response_error", fmt.Errorf("status code: %d", resp.StatusCode), logrus.LogInfo{"vin": entry.Vin, "status": resp.StatusCode})
+	}
 }
 
 // ReportError noop method

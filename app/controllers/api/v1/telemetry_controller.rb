@@ -35,7 +35,11 @@ module Api
       private
 
       def telemetry_params
-        params.permit(:vin, :timestamp, data: [:Gear, :Soc, :VehicleSpeed, Location: [:latitude, :longitude]])
+        params.permit(
+          :vin,
+          metadata: [:timestamp, :receivedat, :txid, :txtype, :version, :device_client_version, :vin],
+          data: [:Gear, :Soc, :VehicleSpeed, :CreatedAt, :IsResend, :Vin, Location: [:latitude, :longitude]]
+        )
       end
     end
   end
