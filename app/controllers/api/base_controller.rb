@@ -2,7 +2,6 @@ module Api
   class BaseController < ActionController::API
     include TeslaFleetErrors
 
-    skip_before_action :verify_authenticity_token
     before_action :authenticate_telemetry_server!
 
     rescue_from StandardError, with: :handle_standard_error

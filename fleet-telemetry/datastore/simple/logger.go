@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 
 	"github.com/teslamotors/fleet-telemetry/datastore/simple/transformers"
 	logrus "github.com/teslamotors/fleet-telemetry/logger"
@@ -57,6 +56,8 @@ func (p *Producer) Produce(entry *telemetry.Record) {
 		p.logger.ErrorLog("record_logging_error", err, logrus.LogInfo{"vin": entry.Vin, "txtype": entry.TxType, "metadata": entry.Metadata()})
 		return
 	}
+
+	p.logger.ActivityLog("record_payload", logrus.LogInfo{"vin": entry.Vin, "metadata": entry.Metadata(), "data": data})
 
 	// Prepare the JSON payload
 	payload := map[string]interface{}{

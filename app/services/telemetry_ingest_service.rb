@@ -16,12 +16,15 @@ class TelemetryIngestService
 
     gear = data[:Gear] || data['Gear']
 
-    result = if gear.to_s.upcase == 'P'
+    # Skip processing if Gear is not present
+    return { success: true, message: "Skipped: no gear data" } if gear.nil?
+
+    result = if gear.to_s.upcase == 'P' || gear.to_s == '<invalid>'
       handle_park_state
     elsif %w[D R N].include?(gear.to_s.upcase)
       handle_driving_state(gear)
     else
-      { success: false, errors: ["Invalid gear state: #{gear}"] }
+      { success: true, message: "Skipped: unrecognized gear state" }
     end
 
     result
@@ -36,7 +39,6 @@ class TelemetryIngestService
     raise ArgumentError, "VIN is required" if vin.blank?
     raise ArgumentError, "Timestamp is required" if timestamp.blank?
     raise ArgumentError, "Data payload is required" if data.blank?
-    raise ArgumentError, "Gear is required" unless data[:Gear] || data['Gear']
 
     # Parse timestamp
     @parsed_timestamp = Time.zone.parse(timestamp.to_s)
