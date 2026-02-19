@@ -20,7 +20,7 @@ module Api
           render json: {
             status: 'error',
             errors: result[:errors]
-          }, status: :unprocessable_entity
+          }, status: :unprocessable_content
         end
       end
 

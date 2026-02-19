@@ -46,7 +46,7 @@ module Api
 
     def handle_unprocessable_entity(exception)
       render json: { error: exception.message, details: exception.record&.errors&.full_messages },
-             status: :unprocessable_entity
+             status: :unprocessable_content
     end
   end
 end
