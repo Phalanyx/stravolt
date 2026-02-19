@@ -17,7 +17,7 @@ class VehiclesController < ApplicationController
   def refresh
     fleet_client = FleetClient.new(current_user)
     data = fleet_client.fetch_vehicle_data(@vehicle.tesla_vehicle_id)
-
+    Rails.logger.info("Refreshed vehicle data: #{data}")
     # Update cached data
     @vehicle.update!(cached_data: data)
 
