@@ -32,4 +32,4 @@ COPY . .
 EXPOSE 3000
 
 # db:prepare runs migrations / loads schema on first boot, then starts Puma
-CMD ["bash", "-c", "bin/rails db:prepare && bin/rails server -b 0.0.0.0"]
+CMD ["bash", "-c", "bin/rails tailwindcss:build && bin/rails db:prepare && bin/rails server -b 0.0.0.0"]
