@@ -11,6 +11,9 @@ services:
       # Keep thruster (the HTTP proxy) on port 3000 to match the Cloudflare tunnel
       HTTP_PORT: "3000"
       DATABASE_URL: postgresql://postgres@postgres:5432/stravolt_production
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USERNAME: postgres
     env_file:
       - .env
     depends_on:
