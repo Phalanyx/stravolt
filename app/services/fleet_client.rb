@@ -12,6 +12,22 @@ class FleetClient
     make_request('/api/1/vehicles')
   end
 
+  # POST wake up a sleeping vehicle
+  def wake_up(vehicle_id)
+    token = @user.ensure_valid_tesla_token
+    raise TokenExpiredError, "Unable to refresh Tesla token" unless token.present?
+
+    response = connection.post("/api/1/vehicles/#{vehicle_id}/wake_up") do |req|
+      req.headers['Authorization'] = "Bearer #{token}"
+      req.headers['Content-Type'] = 'application/json'
+    end
+
+    response.status == 200
+  rescue Faraday::Error => e
+    Rails.logger.error("Tesla wake_up error: #{e.message}")
+    false
+  end
+
   # GET comprehensive vehicle data
   def fetch_vehicle_data(vehicle_id)
     endpoints = "charge_state;drive_state;location_data;vehicle_state"

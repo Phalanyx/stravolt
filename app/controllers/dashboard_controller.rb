@@ -21,7 +21,7 @@ class DashboardController < ApplicationController
 
   rescue TeslaFleetErrors::VehicleAsleepError => e
     # Attempt to wake the vehicle
-    service = TeslaFleetService.new(current_user)
+    service = FleetClient.new(current_user)
     if service.wake_up(@vehicle.tesla_vehicle_id)
       @error = "Vehicle is waking up. Please refresh in a few moments."
     else
@@ -41,7 +41,7 @@ class DashboardController < ApplicationController
   private
 
   def initialize_vehicles
-    service = TeslaFleetService.new(current_user)
+    service = FleetClient.new(current_user)
     vehicles = service.fetch_vehicles
 
     vehicles.each do |vehicle_data|
@@ -58,7 +58,7 @@ class DashboardController < ApplicationController
   end
 
   def fetch_vehicle_stats
-    service = TeslaFleetService.new(current_user)
+    service = FleetClient.new(current_user)
     data = service.fetch_vehicle_data(@vehicle.tesla_vehicle_id)
 
     # Store in database (updated_at will be set automatically)

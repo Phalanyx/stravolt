@@ -32,3 +32,15 @@ services:
       - no-new-privileges:true
     volumes:
       - ./vehicle-command/config:/config
+  
+  # app:
+  #   build:
+  #     context: ./fleet-telemetry
+  #   ports:
+  #     - 0.0.0.0:443:443
+  #   volumes:
+  #     - /root/certs:/config
+  #     - ./config.json:/etc/fleet-telemetry/config.json
+  #   environment:
+  #     - STRAVOLT_API_ENDPOINT
+  #     - STRAVOLT_BEARER_TOKEN
