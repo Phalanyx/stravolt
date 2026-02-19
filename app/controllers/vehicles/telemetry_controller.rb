@@ -10,11 +10,14 @@ module Vehicles
 
       response = client.configure(@vehicle, config)
 
+      vehicle_data = FleetClient.new(current_user).fetch_vehicle_data(@vehicle.tesla_vehicle_id) rescue nil
+
       @vehicle.update!(
         telemetry_active: true,
         telemetry_config: config["config"],
         telemetry_configured_at: Time.current,
-        telemetry_synced: response.dig('response', 'synced') || false
+        telemetry_synced: response.dig('response', 'synced') || false,
+        cached_data: vehicle_data || @vehicle.cached_data
       )
 
       redirect_to @vehicle, notice: "Telemetry streaming started successfully"
