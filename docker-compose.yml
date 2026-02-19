@@ -5,11 +5,9 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3000:80"
     environment:
       RAILS_ENV: production
-      # Keep thruster (the HTTP proxy) on port 3000 to match the Cloudflare tunnel
-      HTTP_PORT: "3000"
       DATABASE_URL: postgresql://postgres@postgres:5432/stravolt_production
       DB_HOST: postgres
       DB_PORT: "5432"
