@@ -10,7 +10,8 @@ class VehiclesController < ApplicationController
   end
 
   def show
-    @vehicle_data = @vehicle.cached_data
+    @vehicle_data  = @vehicle.cached_data
+    @recent_trips  = @vehicle.trips.recent.limit(5)
   end
 
   def refresh

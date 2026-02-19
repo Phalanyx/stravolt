@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe "Api::V1::Telemetry", type: :request do
   include_context "with telemetry auth"
 
-  let(:vin) { "LRW3E1FA4PC921681" }
+  let(:vin) { "testvin" }
 
   # Mirrors the real payload shape dispatched by fleet-telemetry
   let(:telemetry_payload) do

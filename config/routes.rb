@@ -31,6 +31,7 @@ Rails.application.routes.draw do
     resource :telemetry, only: [:create, :destroy], controller: 'vehicles/telemetry' do
       get :errors
     end
+    resources :trips, only: [:index, :show]
   end
 
   # Settings (requires login)
