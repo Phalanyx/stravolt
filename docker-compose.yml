@@ -3,20 +3,20 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    volumes:
-      - .:/rails
-      - bundle_cache:/usr/local/bundle
     environment:
-      # Overrides database.yml so the app reaches the postgres container, not localhost
-      DATABASE_URL: postgresql://postgres@postgres:5432/stravolt_development
+      RAILS_ENV: production
+      # Keep thruster (the HTTP proxy) on port 3000 to match the Cloudflare tunnel
+      HTTP_PORT: "3000"
+      DATABASE_URL: postgresql://postgres@postgres:5432/stravolt_production
     env_file:
       - .env
     depends_on:
       - postgres
       - redis
+    restart: unless-stopped
 
   postgres:
     # this image is just postgres with pgvector installed
@@ -70,5 +70,3 @@ services:
   #     - STRAVOLT_API_ENDPOINT
   #     - STRAVOLT_BEARER_TOKEN
 
-volumes:
-  bundle_cache:
