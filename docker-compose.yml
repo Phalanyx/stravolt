@@ -12,6 +12,7 @@ services:
       DB_HOST: postgres
       DB_PORT: "5432"
       DB_USERNAME: postgres
+      TESLA_PROXY_URL: https://tesla_http_proxy:4443
     env_file:
       - .env
     depends_on:

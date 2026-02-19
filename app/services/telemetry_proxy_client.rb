@@ -1,7 +1,7 @@
 class TelemetryProxyClient
   include TeslaFleetErrors
 
-  PROXY_URL = 'https://localhost:4443'
+  PROXY_URL = ENV.fetch("TESLA_PROXY_URL", "https://localhost:4443")
 
   def initialize(user)
     @user = user
