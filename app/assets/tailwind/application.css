@@ -1,1 +1,425 @@
 @import "tailwindcss";
+
+/* Class-based dark mode for Tailwind v4 */
+@variant dark (&:where(.dark, .dark *));
+
+/* ===== Sidebar ===== */
+details[data-sidebar-target="desktopSidebar"] {
+  width: 256px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+details[data-sidebar-target="desktopSidebar"]:not([open]) {
+  width: 0;
+}
+
+/* ===== Dialog / Modal ===== */
+dialog:not([open]) {
+  display: none !important;
+}
+
+dialog.modal {
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
+}
+
+dialog.slideover {
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
+}
+
+dialog.max-w-full {
+  box-shadow: none;
+}
+
+dialog::backdrop {
+  background: none;
+}
+
+dialog.modal:not(.max-w-full)[open] {
+  animation: fadeIn 200ms forwards, scaleIn 200ms forwards;
+}
+
+dialog.modal:not(.max-w-full)[closing] {
+  animation: fadeOut 200ms forwards, scaleOut 200ms forwards;
+}
+
+dialog.modal.max-w-full[open] {
+  animation: fadeIn 200ms forwards;
+}
+
+dialog.modal.max-w-full[closing] {
+  animation: fadeOut 200ms forwards;
+}
+
+dialog.modal {
+  margin: auto;
+  position: fixed;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  cursor: auto;
+}
+
+dialog.slideover[open] {
+  animation: fadeIn 200ms forwards ease-in-out, slide-in-from-right 200ms forwards ease-in-out;
+}
+
+dialog.slideover[closing] {
+  pointer-events: none;
+  animation: fadeOut 200ms forwards ease-in-out, slide-out-to-right 200ms forwards ease-in-out;
+}
+
+dialog.slideover-top[open] {
+  animation: fadeIn 200ms forwards ease-in-out, slide-in-from-top 200ms forwards ease-in-out;
+}
+
+dialog.slideover-top[closing] {
+  animation: fadeOut 200ms forwards ease-in-out, slide-out-to-top 200ms forwards ease-in-out;
+}
+
+dialog.slideover-bottom[open] {
+  animation: fadeIn 200ms forwards ease-in-out, slide-in-from-bottom 200ms forwards ease-in-out;
+}
+
+dialog.slideover-bottom[closing] {
+  animation: fadeOut 200ms forwards ease-in-out, slide-out-to-bottom 200ms forwards ease-in-out;
+}
+
+dialog.slideover-left[open] {
+  animation: fadeIn 200ms forwards ease-in-out, slide-in-from-left 200ms forwards ease-in-out;
+}
+
+dialog.slideover-left[closing] {
+  animation: fadeOut 200ms forwards ease-in-out, slide-out-to-left 200ms forwards ease-in-out;
+}
+
+dialog.slideover-right[open] {
+  animation: fadeIn 200ms forwards ease-in-out, slide-in-from-right 200ms forwards ease-in-out;
+}
+
+dialog.slideover-right[closing] {
+  animation: fadeOut 200ms forwards ease-in-out, slide-out-to-right 200ms forwards ease-in-out;
+}
+
+/* Drawer */
+dialog.drawer {
+  margin: 0;
+  max-height: 100vh;
+  height: auto;
+  margin-inline: auto;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0;
+  border-radius: 1rem 1rem 0 0;
+  background: white;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+
+.dark dialog.drawer {
+  background: rgb(38 38 38);
+}
+
+dialog.drawer::backdrop {
+  background: none;
+}
+
+dialog.drawer[open] {
+  animation: fadeIn 350ms ease-out forwards;
+}
+
+dialog.drawer[closing] {
+  pointer-events: none;
+  animation: fadeOut 250ms ease-out forwards;
+}
+
+/* Body scroll lock */
+body {
+  scrollbar-gutter: stable;
+  overflow-y: scroll;
+}
+
+body:has(dialog.modal[open]) {
+  overflow: hidden;
+}
+
+body:has(dialog.slideover[open]) {
+  overflow: hidden;
+}
+
+body:has(dialog.drawer[open]) {
+  overflow: hidden;
+}
+
+/* Div-based modals */
+.modal-div {
+  cursor: auto;
+}
+
+.modal-div.modal-open {
+  display: flex !important;
+}
+
+.modal-div.modal-visible {
+  opacity: 1;
+}
+
+.modal-div.modal-visible > div {
+  transform: scale(1);
+}
+
+.modal-div:not(.modal-visible) {
+  opacity: 0;
+}
+
+.modal-div:not(.modal-visible) > div {
+  transform: scale(0.95);
+}
+
+body:has(.modal-div.modal-open) {
+  overflow: hidden;
+}
+
+/* Scrollbar compensation */
+:root {
+  --scrollbar-compensation: 0px;
+}
+
+body.modal-open,
+body.slideover-open,
+body.drawer-open {
+  padding-right: var(--scrollbar-compensation);
+}
+
+body.modal-open .fixed,
+body.slideover-open .fixed,
+body.drawer-open .fixed {
+  padding-right: var(--scrollbar-compensation);
+}
+
+body.slideover-open [data-slideover-target="dialog"],
+body.drawer-open [data-drawer-target="dialog"] {
+  padding-right: 0 !important;
+}
+
+dialog.slideover-top,
+dialog.slideover-bottom {
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.6);
+}
+
+/* ===== Toast Notifications ===== */
+.toast-item {
+  @apply absolute w-full left-0 select-none;
+  z-index: var(--toast-z-index, 100);
+  top: var(--toast-top, auto);
+  bottom: var(--toast-bottom, auto);
+  transform: var(--toast-transform, translateY(0));
+  scale: var(--toast-scale, 100%);
+  opacity: var(--toast-opacity, 1);
+  transition: transform 400ms ease, opacity 400ms ease, scale 400ms ease, top 400ms ease, bottom 400ms ease, height 200ms ease;
+}
+
+.toast-item[data-mounted="false"] {
+  opacity: 0;
+}
+
+.toast-item[data-mounted="false"][data-position*="bottom"] {
+  transform: translateY(100%);
+}
+
+.toast-item[data-mounted="false"][data-position*="top"] {
+  transform: translateY(-100%);
+}
+
+.toast-item[data-removed="true"] {
+  opacity: 0;
+  scale: 95%;
+  pointer-events: none;
+}
+
+.toast-item[data-removed="true"][data-expanded="false"][data-position*="bottom"] {
+  transform: translateY(calc(var(--toast-index) * 14px + 5%));
+}
+
+.toast-item[data-removed="true"][data-expanded="false"][data-position*="top"] {
+  transform: translateY(calc(-1 * (var(--toast-index) * 14px + 5%)));
+}
+
+.toast-item[data-removed="true"][data-overflow="true"][data-expanded="false"][data-position*="bottom"] {
+  transform: translateY(calc(-1 * (var(--toast-index) * 14px + 25%)));
+  scale: 78%;
+}
+
+.toast-item[data-removed="true"][data-overflow="true"][data-expanded="false"][data-position*="top"] {
+  transform: translateY(calc(var(--toast-index) * 14px + 25%));
+  scale: 78%;
+}
+
+.toast-item[data-visible="false"] {
+  pointer-events: none;
+}
+
+.toast-item[data-expanded="true"] {
+  --toast-scale: 100%;
+  height: var(--initial-height);
+}
+
+.toast-item[data-expanded="true"][data-position*="bottom"] {
+  --toast-top: auto;
+  --toast-bottom: var(--toast-offset, 0px);
+  --toast-transform: translateY(0);
+}
+
+.toast-item[data-expanded="true"][data-position*="top"] {
+  --toast-top: var(--toast-offset, 0px);
+  --toast-bottom: auto;
+  --toast-transform: translateY(0);
+}
+
+.toast-item[data-expanded="false"][data-front="true"] {
+  --toast-scale: 100%;
+  --toast-opacity: 1;
+  height: var(--initial-height);
+}
+
+.toast-item[data-expanded="false"][data-front="true"][data-position*="bottom"] {
+  --toast-top: auto;
+  --toast-bottom: 0px;
+  --toast-transform: translateY(0);
+}
+
+.toast-item[data-expanded="false"][data-front="true"][data-position*="top"] {
+  --toast-top: 0px;
+  --toast-bottom: auto;
+  --toast-transform: translateY(0);
+}
+
+.toast-item[data-expanded="false"]:not([data-front="true"]) {
+  height: var(--front-toast-height);
+  overflow: hidden;
+  --toast-scale: calc(100% - (var(--toast-index) * 6%));
+  display: flex;
+  flex-direction: column;
+}
+
+.toast-item[data-expanded="false"]:not([data-front="true"])[data-position*="bottom"] {
+  --toast-top: auto;
+  --toast-bottom: 0px;
+  --toast-transform: translateY(calc(-1 * var(--toast-index) * 14px));
+  justify-content: flex-start;
+}
+
+.toast-item[data-expanded="false"]:not([data-front="true"])[data-position*="top"] {
+  --toast-top: 0px;
+  --toast-bottom: auto;
+  --toast-transform: translateY(calc(var(--toast-index) * 14px));
+  justify-content: flex-end;
+}
+
+.toast-item[data-expanded="false"][data-visible="false"] {
+  --toast-opacity: 0;
+  --toast-scale: 82%;
+}
+
+.toast-item[data-expanded="false"][data-visible="false"][data-position*="bottom"] {
+  --toast-top: auto;
+  --toast-bottom: -200px;
+  --toast-transform: translateY(0);
+}
+
+.toast-item[data-expanded="false"][data-visible="false"][data-position*="top"] {
+  --toast-top: -200px;
+  --toast-bottom: auto;
+  --toast-transform: translateY(0);
+}
+
+/* ===== Keyframes ===== */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); }
+  to { transform: scale(1); }
+}
+
+@keyframes scaleOut {
+  from { transform: scale(1); }
+  to { transform: scale(0.95); }
+}
+
+@keyframes slide-in-from-top {
+  from { transform: translateY(-100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slide-out-to-top {
+  from { transform: translateY(0); }
+  to { transform: translateY(-100%); }
+}
+
+@keyframes slide-in-from-bottom {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes slide-out-to-bottom {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+@keyframes slide-in-from-left {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slide-out-to-left {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100%); }
+}
+
+@keyframes slide-in-from-right {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slide-out-to-right {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  dialog.modal[open],
+  dialog.modal[closing],
+  dialog.slideover[open],
+  dialog.slideover[closing],
+  dialog.slideover-top[open],
+  dialog.slideover-top[closing],
+  dialog.slideover-bottom[open],
+  dialog.slideover-bottom[closing],
+  dialog.slideover-left[open],
+  dialog.slideover-left[closing],
+  dialog.slideover-right[open],
+  dialog.slideover-right[closing],
+  dialog.drawer[open],
+  dialog.drawer[closing] {
+    animation: none;
+  }
+
+  dialog.modal,
+  dialog.slideover,
+  dialog.drawer,
+  .modal-div,
+  .modal-div > div {
+    transition: none;
+  }
+}

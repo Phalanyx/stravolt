@@ -1,87 +1,75 @@
-<div class="max-w-6xl mx-auto">
-  <div class="flex items-center justify-between mb-8">
+<div class="max-w-5xl mx-auto">
+  <div class="flex items-start justify-between mb-6">
     <div>
-      <h1 class="text-4xl font-bold text-gray-900">Trip Detail</h1>
-      <p class="text-sm text-gray-600 mt-1">
+      <h1 class="text-xl font-semibold text-neutral-900 dark:text-neutral-100">Trip Detail</h1>
+      <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">
         <%= @vehicle.display_name || 'Tesla' %> &mdash; <%= @trip.started_at.strftime("%b %-d, %Y %H:%M") %>
       </p>
     </div>
-    <div class="flex gap-3">
-      <%= link_to "Back to Trips", vehicle_trips_path(@vehicle),
-          class: "bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700" %>
-    </div>
+    <%= link_to "All Trips", vehicle_trips_path(@vehicle),
+          class: "inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors" %>
   </div>
 
-  <!-- Stat Cards -->
-  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-      <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</p>
-      <p class="mt-1 text-2xl font-semibold text-gray-900"><%= @trip.duration_formatted || '—' %></p>
+  <%# Stat cards %>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
+      <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1">Duration</p>
+      <p class="text-xl font-semibold text-neutral-900 dark:text-neutral-100"><%= @trip.duration_formatted || '—' %></p>
     </div>
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-      <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Distance</p>
-      <p class="mt-1 text-2xl font-semibold text-gray-900">
-        <% if @trip.distance_km.present? %>
-          <%= "%.2f km" % @trip.distance_km %>
-        <% else %>
-          —
-        <% end %>
+    <div class="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
+      <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1">Distance</p>
+      <p class="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
+        <%= @trip.distance_km.present? ? ("%.2f km" % @trip.distance_km) : '—' %>
       </p>
     </div>
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-      <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Avg Speed</p>
-      <p class="mt-1 text-2xl font-semibold text-gray-900">
-        <% if @trip.avg_speed_kmh.present? %>
-          <%= "%.1f km/h" % @trip.avg_speed_kmh %>
-        <% else %>
-          —
-        <% end %>
+    <div class="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
+      <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1">Avg Speed</p>
+      <p class="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
+        <%= @trip.avg_speed_kmh.present? ? ("%.1f km/h" % @trip.avg_speed_kmh) : '—' %>
       </p>
     </div>
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-      <p class="text-xs font-medium text-gray-500 uppercase tracking-wider">Battery Used</p>
-      <p class="mt-1 text-2xl font-semibold text-gray-900">
-        <% if @trip.battery_consumed_percent.present? %>
-          <%= "%.1f%%" % @trip.battery_consumed_percent %>
-        <% else %>
-          —
-        <% end %>
+    <div class="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 p-4">
+      <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider mb-1">Battery Used</p>
+      <p class="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
+        <%= @trip.battery_consumed_percent.present? ? ("%.1f%%" % @trip.battery_consumed_percent) : '—' %>
       </p>
     </div>
   </div>
 
-  <!-- Intervals Table -->
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200">
-      <h2 class="text-lg font-semibold text-gray-900">Intervals (<%= @intervals.count %>)</h2>
+  <%# Intervals table %>
+  <div class="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+    <div class="px-6 py-4 border-b border-neutral-200 dark:border-neutral-800">
+      <h2 class="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">
+        Intervals (<%= @intervals.count %>)
+      </h2>
     </div>
     <% if @intervals.any? %>
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+      <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-800">
+        <thead class="bg-neutral-50 dark:bg-neutral-950">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lat / Lon</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Speed</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Battery %</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gear</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Time</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Lat / Lon</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Speed</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Battery %</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Gear</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="divide-y divide-neutral-200 dark:divide-neutral-800">
           <% @intervals.each do |interval| %>
-            <tr class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            <tr class="bg-white dark:bg-neutral-950 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors">
+              <td class="px-6 py-3 whitespace-nowrap text-sm text-neutral-900 dark:text-neutral-100">
                 <%= interval.recorded_at.strftime("%H:%M:%S") %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">
+              <td class="px-6 py-3 whitespace-nowrap text-xs text-neutral-500 dark:text-neutral-400 font-mono">
                 <%= "%.5f, %.5f" % [interval.latitude, interval.longitude] %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              <td class="px-6 py-3 whitespace-nowrap text-sm text-neutral-500 dark:text-neutral-400">
                 <%= "%.1f km/h" % interval.speed_kmh %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              <td class="px-6 py-3 whitespace-nowrap text-sm text-neutral-500 dark:text-neutral-400">
                 <%= interval.battery_percent.present? ? "#{interval.battery_percent}%" : '—' %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              <td class="px-6 py-3 whitespace-nowrap text-sm text-neutral-500 dark:text-neutral-400">
                 <%= interval.gear || '—' %>
               </td>
             </tr>
@@ -90,7 +78,7 @@
       </table>
     <% else %>
       <div class="p-12 text-center">
-        <p class="text-gray-600">No intervals recorded for this trip.</p>
+        <p class="text-sm text-neutral-500 dark:text-neutral-400">No intervals recorded for this trip.</p>
       </div>
     <% end %>
   </div>

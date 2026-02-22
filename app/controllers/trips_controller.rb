@@ -1,4 +1,5 @@
 class TripsController < ApplicationController
+  layout "dashboard"
   before_action :authenticate_user!
   before_action :find_vehicle
 

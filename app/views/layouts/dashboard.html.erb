@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Stravolt" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Stravolt">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+
+    <%# Prevent dark mode flash — runs before paint %>
+    <script>
+      (function() {
+        var theme = localStorage.getItem('theme') || 'light';
+        if (theme === 'dark') document.documentElement.classList.add('dark');
+      })();
+    </script>
+
+    <%# Google Maps API %>
+    <% if ENV['GOOGLE_MAPS_KEY'].present? %>
+      <script>
+        (function() {
+          const script = document.createElement('script');
+          script.src = `https://maps.googleapis.com/maps/api/js?key=<%= ENV['GOOGLE_MAPS_KEY'] %>&callback=Function.prototype`;
+          script.async = true;
+          script.defer = true;
+          script.onload = function() {
+            window.dispatchEvent(new Event('google-maps-loaded'));
+          };
+          document.head.appendChild(script);
+        })();
+      </script>
+    <% end %>
+  </head>
+
+  <body class="bg-white dark:bg-neutral-950 antialiased">
+    <%# Toast container %>
+    <%= render "shared/toast_container" %>
+
+    <%# Flash to toast %>
+    <% if flash[:toast].present? %>
+      <% toast_data = flash[:toast].is_a?(Hash) ? flash[:toast].with_indifferent_access : {} %>
+      <script>
+        document.addEventListener('turbo:load', function() {
+          if (window.toast) toast('<%= j toast_data[:message] %>', {
+            type: '<%= toast_data[:type] || "default" %>',
+            description: '<%= j toast_data[:description].to_s %>'
+          });
+        }, { once: true });
+      </script>
+    <% end %>
+    <% if notice.present? %>
+      <script>
+        document.addEventListener('turbo:load', function() {
+          if (window.toast) toast('<%= j notice %>', { type: 'success' });
+        }, { once: true });
+      </script>
+    <% end %>
+    <% if alert.present? %>
+      <script>
+        document.addEventListener('turbo:load', function() {
+          if (window.toast) toast('<%= j alert %>', { type: 'error' });
+        }, { once: true });
+      </script>
+    <% end %>
+
+    <div data-controller="sidebar" class="flex h-screen overflow-hidden">
+
+      <%# Desktop sidebar — <details> manages open/collapsed state %>
+      <details data-sidebar-target="desktopSidebar"
+               class="hidden md:flex flex-col h-full bg-white dark:bg-neutral-950 border-r border-neutral-200 dark:border-neutral-800 overflow-hidden">
+        <summary class="list-none"></summary>
+        <div data-sidebar-target="desktopContent" class="flex flex-col h-full w-64 min-w-[256px]"></div>
+      </details>
+
+      <%# Mobile sidebar overlay — hidden until toggled %>
+      <div data-sidebar-target="mobileSidebar" class="hidden fixed inset-0 z-[60] md:hidden">
+        <div data-sidebar-target="mobileBackdrop"
+             class="absolute inset-0 bg-black/50"
+             style="opacity: 0; transition: opacity 300ms ease;"></div>
+        <div data-sidebar-target="mobilePanel"
+             class="absolute top-0 left-0 bottom-0 w-72 flex flex-col bg-white dark:bg-neutral-950 shadow-xl"
+             style="transform: translateX(-100%); transition: transform 300ms ease;">
+          <div data-sidebar-target="sharedContent" class="flex flex-col h-full"></div>
+        </div>
+      </div>
+
+      <%# Nav content template — cloned by sidebar controller into desktop & mobile %>
+      <template data-sidebar-target="contentTemplate">
+        <nav class="flex flex-col h-full">
+          <%# Sidebar header with logo and collapse button %>
+          <div class="flex items-center justify-between px-4 h-14 border-b border-neutral-200 dark:border-neutral-800 shrink-0">
+            <span class="text-sm font-semibold text-neutral-900 dark:text-neutral-100 tracking-tight">Stravolt</span>
+            <button data-action="click->sidebar#close"
+                    class="cursor-w-resize p-1.5 rounded-md text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                    aria-label="Collapse sidebar">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+            </button>
+          </div>
+
+          <%# Nav links %>
+          <div class="flex-1 overflow-y-auto px-3 py-3 space-y-0.5">
+            <a href="<%= dashboard_path %>"
+               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors <%= current_page?(dashboard_path) ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100' : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-neutral-100' %>">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>
+              </svg>
+              Dashboard
+            </a>
+
+            <a href="<%= vehicles_path %>"
+               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors <%= current_page?(vehicles_path) || request.path.start_with?('/vehicles') ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100' : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-neutral-100' %>">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 17H3a2 2 0 01-2-2V9a2 2 0 012-2h2m14 10h2a2 2 0 002-2V9a2 2 0 00-2-2h-2m-9 8h6m-8-4h10M7 7l2-4h6l2 4"/>
+              </svg>
+              Vehicles
+            </a>
+
+            <a href="<%= settings_path %>"
+               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors <%= current_page?(settings_path) ? 'bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100' : 'text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-neutral-100' %>">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+              </svg>
+              Settings
+            </a>
+          </div>
+
+          <%# Bottom: dark mode toggle + user info %>
+          <div class="px-3 py-3 border-t border-neutral-200 dark:border-neutral-800 shrink-0 space-y-0.5">
+            <%# Dark mode toggle %>
+            <button data-controller="dark-mode"
+                    data-action="click->dark-mode#toggle"
+                    class="flex w-full items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-neutral-600 dark:text-neutral-400 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors">
+              <%# Sun icon — shown in dark mode %>
+              <svg class="hidden dark:block w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+              </svg>
+              <%# Moon icon — shown in light mode %>
+              <svg class="dark:hidden w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+              </svg>
+              <span class="hidden dark:inline">Light mode</span>
+              <span class="dark:hidden">Dark mode</span>
+            </button>
+
+            <%# User info + sign out %>
+            <div class="px-3 py-2">
+              <p class="text-xs text-neutral-500 dark:text-neutral-400 truncate"><%= current_user&.email %></p>
+              <%= button_to "Sign out", destroy_user_session_path, method: :delete,
+                    class: "mt-1.5 text-xs text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors" %>
+            </div>
+          </div>
+        </nav>
+      </template>
+
+      <%# Main content area %>
+      <div class="flex flex-col flex-1 min-w-0 overflow-hidden">
+
+        <%# Top bar: mobile hamburger + desktop sidebar-open button %>
+        <header class="flex items-center gap-3 px-4 h-14 border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 shrink-0">
+          <%# Mobile: open mobile sidebar %>
+          <button data-action="click->sidebar#openMobile"
+                  class="md:hidden p-1.5 rounded-md text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                  aria-label="Open navigation">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+
+          <%# Desktop: toggle sidebar (always visible) %>
+          <button data-action="click->sidebar#toggle"
+                  class="hidden md:flex p-1.5 rounded-md text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+                  aria-label="Toggle sidebar">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+
+          <%# Logo shown on mobile %>
+          <span class="md:hidden text-sm font-semibold text-neutral-900 dark:text-neutral-100">Stravolt</span>
+        </header>
+
+        <main class="flex-1 overflow-auto bg-neutral-50 dark:bg-neutral-950">
+          <div class="px-4 md:px-6 py-6">
+            <%= yield %>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

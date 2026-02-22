@@ -34,14 +34,14 @@ services:
     ports:
       - 6379:6379
 
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    command: tunnel --no-autoupdate run
-    environment:
-      - TUNNEL_TOKEN=${TUNNEL_TOKEN}
-    depends_on:
-      - web
-    restart: unless-stopped
+  # cloudflared:
+  #   image: cloudflare/cloudflared:latest
+  #   command: tunnel --no-autoupdate run
+  #   environment:
+  #     - TUNNEL_TOKEN=${TUNNEL_TOKEN}
+  #   depends_on:
+  #     - web
+  #   restart: unless-stopped
 
   tesla_http_proxy:
     image: tesla/vehicle-command:latest

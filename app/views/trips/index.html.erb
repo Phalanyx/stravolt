@@ -1,65 +1,53 @@
-<div class="max-w-6xl mx-auto">
-  <div class="flex items-center justify-between mb-8">
+<div class="max-w-5xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
     <div>
-      <h1 class="text-4xl font-bold text-gray-900">Trips</h1>
-      <p class="text-sm text-gray-600 mt-1"><%= @vehicle.display_name || 'Tesla' %> &mdash; <%= @vehicle.vin %></p>
+      <h1 class="text-xl font-semibold text-neutral-900 dark:text-neutral-100">Trips</h1>
+      <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">
+        <%= @vehicle.display_name || 'Tesla' %> &mdash; <span class="font-mono text-xs"><%= @vehicle.vin %></span>
+      </p>
     </div>
-    <div class="flex gap-3">
-      <%= link_to "Back to Vehicle", vehicle_path(@vehicle),
-          class: "bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700" %>
-    </div>
+    <%= link_to "Back to Vehicle", vehicle_path(@vehicle),
+          class: "inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors" %>
   </div>
 
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+  <div class="bg-white dark:bg-neutral-900 rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-hidden">
     <% if @trips.any? %>
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+      <table class="min-w-full divide-y divide-neutral-200 dark:divide-neutral-800">
+        <thead class="bg-neutral-50 dark:bg-neutral-950">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Distance</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Battery Used</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Date</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Duration</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Distance</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Battery Used</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider">Status</th>
+            <th class="px-6 py-3"></th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody class="divide-y divide-neutral-200 dark:divide-neutral-800">
           <% @trips.each do |trip| %>
-            <tr class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+            <tr class="bg-white dark:bg-neutral-950 hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-900 dark:text-neutral-100">
                 <%= trip.started_at.strftime("%b %-d, %Y %H:%M") %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500 dark:text-neutral-400">
                 <%= trip.duration_formatted || '—' %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                <% if trip.distance_km.present? %>
-                  <%= "%.2f km" % trip.distance_km %>
-                <% else %>
-                  —
-                <% end %>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500 dark:text-neutral-400">
+                <%= trip.distance_km.present? ? ("%.2f km" % trip.distance_km) : '—' %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                <% if trip.battery_consumed_percent.present? %>
-                  <%= "%.1f%%" % trip.battery_consumed_percent %>
-                <% else %>
-                  —
-                <% end %>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-500 dark:text-neutral-400">
+                <%= trip.battery_consumed_percent.present? ? ("%.1f%%" % trip.battery_consumed_percent) : '—' %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <% if trip.trip_status == 'completed' %>
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    Completed
-                  </span>
+                  <span class="inline-flex items-center rounded-full bg-green-50 dark:bg-green-900/20 px-2 py-0.5 text-xs font-medium text-green-700 dark:text-green-400 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30">Completed</span>
                 <% else %>
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                    In Progress
-                  </span>
+                  <span class="inline-flex items-center rounded-full bg-amber-50 dark:bg-amber-900/20 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-400 ring-1 ring-inset ring-amber-600/20 dark:ring-amber-500/30">In Progress</span>
                 <% end %>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <td class="px-6 py-4 whitespace-nowrap text-right">
                 <%= link_to "View", vehicle_trip_path(@vehicle, trip),
-                    class: "text-indigo-600 hover:text-indigo-900" %>
+                      class: "text-xs font-medium text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors" %>
               </td>
             </tr>
           <% end %>
@@ -67,7 +55,7 @@
       </table>
     <% else %>
       <div class="p-12 text-center">
-        <p class="text-gray-600">No trips recorded yet. Trips appear here once telemetry data is received.</p>
+        <p class="text-sm text-neutral-500 dark:text-neutral-400">No trips recorded yet. Trips appear once telemetry data is received.</p>
       </div>
     <% end %>
   </div>
