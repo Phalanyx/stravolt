@@ -3,9 +3,9 @@
 # Run as root: bash setup-linode.sh
 set -euo pipefail
 
-APP_USER="rails"
-APP_DIR="/var/www/stravolt"
+APP_DIR="$(pwd)"
 RUBY_VERSION="3.4.8"
+RBENV_ROOT="/root/.rbenv"
 
 green() { echo -e "\033[32m$*\033[0m"; }
 step()  { echo; green "==> $*"; }
@@ -27,46 +27,35 @@ apt-get install -y --no-install-recommends \
   pkg-config \
   nginx
 
-# ── 2. App user ───────────────────────────────────────────────────────────────
-step "Creating app user '$APP_USER'"
-if ! id "$APP_USER" &>/dev/null; then
-  useradd --system --shell /bin/bash --create-home "$APP_USER"
-fi
-
-# ── 3. rbenv + Ruby ───────────────────────────────────────────────────────────
+# ── 2. rbenv + Ruby ───────────────────────────────────────────────────────────
 step "Installing rbenv and Ruby $RUBY_VERSION"
-RBENV_ROOT="/home/$APP_USER/.rbenv"
 
 if [ ! -d "$RBENV_ROOT" ]; then
-  sudo -u "$APP_USER" git clone https://github.com/rbenv/rbenv.git "$RBENV_ROOT"
-  sudo -u "$APP_USER" git clone https://github.com/rbenv/ruby-build.git "$RBENV_ROOT/plugins/ruby-build"
+  git clone https://github.com/rbenv/rbenv.git "$RBENV_ROOT"
+  git clone https://github.com/rbenv/ruby-build.git "$RBENV_ROOT/plugins/ruby-build"
 fi
 
-PROFILE="/home/$APP_USER/.bashrc"
+PROFILE="/root/.bashrc"
 grep -qxF 'export PATH="$HOME/.rbenv/bin:$PATH"' "$PROFILE" || \
   echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> "$PROFILE"
 grep -qxF 'eval "$(rbenv init -)"' "$PROFILE" || \
   echo 'eval "$(rbenv init -)"' >> "$PROFILE"
 
-RBENV="sudo -u $APP_USER $RBENV_ROOT/bin/rbenv"
+export PATH="$RBENV_ROOT/bin:$PATH"
+eval "$($RBENV_ROOT/bin/rbenv init -)"
 
-if ! $RBENV versions --bare | grep -q "^${RUBY_VERSION}$"; then
+if ! rbenv versions --bare | grep -q "^${RUBY_VERSION}$"; then
   step "Compiling Ruby $RUBY_VERSION (this takes a few minutes)"
-  sudo -u "$APP_USER" bash -c "cd ~ && $RBENV_ROOT/bin/rbenv install $RUBY_VERSION"
+  rbenv install "$RUBY_VERSION"
 fi
 
-$RBENV global "$RUBY_VERSION"
+rbenv global "$RUBY_VERSION"
 
-# ── 4. Bundler ────────────────────────────────────────────────────────────────
+# ── 3. Bundler ────────────────────────────────────────────────────────────────
 step "Installing Bundler"
-sudo -u "$APP_USER" "$RBENV_ROOT/shims/gem" install bundler --no-document
+"$RBENV_ROOT/shims/gem" install bundler --no-document
 
-# ── 5. App directory ──────────────────────────────────────────────────────────
-step "Setting up app directory at $APP_DIR"
-mkdir -p "$APP_DIR"
-chown "$APP_USER:$APP_USER" "$APP_DIR"
-
-# ── 6. Systemd service ────────────────────────────────────────────────────────
+# ── 4. Systemd service ────────────────────────────────────────────────────────
 step "Installing systemd service"
 cat > /etc/systemd/system/stravolt.service <<EOF
 [Unit]
@@ -75,7 +64,7 @@ After=network.target
 
 [Service]
 Type=simple
-User=$APP_USER
+User=root
 WorkingDirectory=$APP_DIR
 Environment=RAILS_ENV=production
 EnvironmentFile=$APP_DIR/.env
@@ -96,11 +85,11 @@ systemctl enable stravolt
 # ── Done ──────────────────────────────────────────────────────────────────────
 echo
 green "✓ Done. Next steps:"
-echo "  1. Copy your app to $APP_DIR and your .env file"
-echo "  2. sudo -u $APP_USER $RBENV_ROOT/shims/bundle install --without development test"
-echo "  3. sudo -u $APP_USER $RBENV_ROOT/shims/bundle exec rails assets:precompile"
-echo "  4. sudo -u $APP_USER $RBENV_ROOT/shims/bundle exec rails db:migrate"
-echo "  5. Place nginx.conf in /etc/nginx/sites-available/stravolt and symlink it"
-echo "     sudo ln -s /etc/nginx/sites-available/stravolt /etc/nginx/sites-enabled/"
-echo "     sudo nginx -t && sudo systemctl reload nginx"
-echo "  6. sudo systemctl start stravolt"
+echo "  1. cd $APP_DIR"
+echo "  2. bundle install --without development test"
+echo "  3. bundle exec rails assets:precompile"
+echo "  4. bundle exec rails db:migrate"
+echo "  5. cp nginx.conf /etc/nginx/sites-available/stravolt"
+echo "     ln -s /etc/nginx/sites-available/stravolt /etc/nginx/sites-enabled/"
+echo "     nginx -t && systemctl reload nginx"
+echo "  6. systemctl start stravolt"

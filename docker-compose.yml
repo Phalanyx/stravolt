@@ -1,19 +1,19 @@
 services:
 
-  web:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "3000:80"
-    environment:
-      RAILS_ENV: production
-      TESLA_PROXY_URL: https://tesla_http_proxy:4443
-    env_file:
-      - .env
-    volumes:
-      - sqlite_db:/rails/db
-    restart: unless-stopped
+  # web:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:80"
+  #   environment:
+  #     RAILS_ENV: production
+  #     TESLA_PROXY_URL: https://tesla_http_proxy:4443
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - sqlite_db:/rails/db
+  #   restart: unless-stopped
 
   tesla_http_proxy:
     image: tesla/vehicle-command:latest
