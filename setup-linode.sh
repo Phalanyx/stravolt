@@ -47,7 +47,7 @@ User=root
 WorkingDirectory=$APP_DIR
 Environment=RAILS_ENV=production
 EnvironmentFile=$APP_DIR/.env
-ExecStart=$BUNDLE_BIN exec thrust $RAILS_BIN server -p 3000 -b 127.0.0.1
+ExecStart=$BUNDLE_BIN exec rails server -p 3000 -b 127.0.0.1
 Restart=on-failure
 RestartSec=5
 StandardOutput=journal
