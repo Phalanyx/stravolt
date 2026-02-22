@@ -13,8 +13,6 @@ services:
       - .env
     volumes:
       - sqlite_db:/rails/db
-    depends_on:
-      - redis
     restart: unless-stopped
 
   tesla_http_proxy:
