@@ -24,7 +24,8 @@ apt-get install -y --no-install-recommends \
   libreadline-dev \
   zlib1g-dev \
   pkg-config \
-  nginx
+  nginx \
+  libnginx-mod-stream
 
 # ── 2. Bundler ────────────────────────────────────────────────────────────────
 step "Installing Bundler"
