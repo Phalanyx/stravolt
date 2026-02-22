@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/teslamotors/fleet-telemetry/datastore/simple/transformers"
 	logrus "github.com/teslamotors/fleet-telemetry/logger"
