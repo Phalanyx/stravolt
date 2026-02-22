@@ -6,6 +6,7 @@ module Vehicles
     # POST /vehicles/:vehicle_id/telemetry
     def create
       client = TelemetryProxyClient.new(current_user)
+      Rails.logger.info("Cert in env: #{ENV['TELEMETRY_CHAIN']}")
       config = TelemetryConfigBuilder.build_config(@vehicle)
 
       response = client.configure(@vehicle, config)
