@@ -89,9 +89,7 @@ RAILS_ENV=production bundle exec rails db:migrate
 
 # ── 8. Nginx ──────────────────────────────────────────────────────────────────
 step "Configuring nginx"
-cp "$APP_DIR/nginx.conf" /etc/nginx/sites-available/stravolt
-ln -sf /etc/nginx/sites-available/stravolt /etc/nginx/sites-enabled/stravolt
-rm -f /etc/nginx/sites-enabled/default
+cp "$APP_DIR/nginx.conf" /etc/nginx/nginx.conf
 nginx -t && systemctl reload nginx
 
 # ── 9. Start app ──────────────────────────────────────────────────────────────
