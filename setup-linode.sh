@@ -3,7 +3,7 @@
 # Run as root: bash setup-linode.sh
 set -euo pipefail
 
-APP_DIR="/root/stravolt"
+APP_DIR="$(pwd)"
 
 green() { echo -e "\033[32m$*\033[0m"; }
 step()  { echo; green "==> $*"; }
