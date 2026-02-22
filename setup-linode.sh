@@ -52,7 +52,7 @@ RBENV="sudo -u $APP_USER $RBENV_ROOT/bin/rbenv"
 
 if ! $RBENV versions --bare | grep -q "^${RUBY_VERSION}$"; then
   step "Compiling Ruby $RUBY_VERSION (this takes a few minutes)"
-  $RBENV install "$RUBY_VERSION"
+  sudo -u "$APP_USER" bash -c "cd ~ && $RBENV_ROOT/bin/rbenv install $RUBY_VERSION"
 fi
 
 $RBENV global "$RUBY_VERSION"
