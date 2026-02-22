@@ -66,22 +66,35 @@ cd "$APP_DIR"
 bundle config set --local without "development test"
 bundle install
 
-# ── 5. Precompile assets ──────────────────────────────────────────────────────
+# ── 5. Load env + generate SECRET_KEY_BASE if missing ────────────────────────
+if [ ! -f "$APP_DIR/.env" ]; then
+  echo "ERROR: $APP_DIR/.env not found. Create it before running this script." >&2
+  exit 1
+fi
+set -a; source "$APP_DIR/.env"; set +a
+
+if [ -z "${SECRET_KEY_BASE:-}" ]; then
+  step "Generating SECRET_KEY_BASE"
+  echo "SECRET_KEY_BASE=$(bundle exec rails secret)" >> "$APP_DIR/.env"
+  set -a; source "$APP_DIR/.env"; set +a
+fi
+
+# ── 6. Precompile assets ──────────────────────────────────────────────────────
 step "Precompiling assets"
 RAILS_ENV=production bundle exec rails assets:precompile
 
-# ── 6. Database migrate ───────────────────────────────────────────────────────
+# ── 7. Database migrate ───────────────────────────────────────────────────────
 step "Running database migrations"
 RAILS_ENV=production bundle exec rails db:migrate
 
-# ── 7. Nginx ──────────────────────────────────────────────────────────────────
+# ── 8. Nginx ──────────────────────────────────────────────────────────────────
 step "Configuring nginx"
 cp "$APP_DIR/nginx.conf" /etc/nginx/sites-available/stravolt
 ln -sf /etc/nginx/sites-available/stravolt /etc/nginx/sites-enabled/stravolt
 rm -f /etc/nginx/sites-enabled/default
 nginx -t && systemctl reload nginx
 
-# ── 8. Start app ──────────────────────────────────────────────────────────────
+# ── 9. Start app ──────────────────────────────────────────────────────────────
 step "Starting stravolt service"
 systemctl start stravolt
 
