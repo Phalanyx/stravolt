@@ -49,7 +49,7 @@ gem "devise"                             # User authentication
 gem "omniauth-oauth2"                    # OAuth2 strategy for Tesla
 gem "omniauth-rails_csrf_protection"     # CSRF protection for OmniAuth
 gem "faraday"                            # HTTP client for Tesla API
-gem "dotenv-rails", groups: [:development, :test]  # Environment variables
+gem "dotenv-rails", "~> 2.8", groups: [:development, :test]  # Environment variables
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
