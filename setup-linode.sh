@@ -82,14 +82,28 @@ EOF
 systemctl daemon-reload
 systemctl enable stravolt
 
-# ── Done ──────────────────────────────────────────────────────────────────────
+# ── 5. Bundle install ─────────────────────────────────────────────────────────
+step "Installing gems"
+"$RBENV_ROOT/shims/bundle" install --without development test
+
+# ── 6. Precompile assets ──────────────────────────────────────────────────────
+step "Precompiling assets"
+RAILS_ENV=production "$RBENV_ROOT/shims/bundle" exec rails assets:precompile
+
+# ── 7. Database migrate ───────────────────────────────────────────────────────
+step "Running database migrations"
+RAILS_ENV=production "$RBENV_ROOT/shims/bundle" exec rails db:migrate
+
+# ── 8. Nginx ──────────────────────────────────────────────────────────────────
+step "Configuring nginx"
+cp nginx.conf /etc/nginx/sites-available/stravolt
+ln -sf /etc/nginx/sites-available/stravolt /etc/nginx/sites-enabled/stravolt
+rm -f /etc/nginx/sites-enabled/default
+nginx -t && systemctl reload nginx
+
+# ── 9. Start app ──────────────────────────────────────────────────────────────
+step "Starting stravolt service"
+systemctl start stravolt
+
 echo
-green "✓ Done. Next steps:"
-echo "  1. cd $APP_DIR"
-echo "  2. bundle install --without development test"
-echo "  3. bundle exec rails assets:precompile"
-echo "  4. bundle exec rails db:migrate"
-echo "  5. cp nginx.conf /etc/nginx/sites-available/stravolt"
-echo "     ln -s /etc/nginx/sites-available/stravolt /etc/nginx/sites-enabled/"
-echo "     nginx -t && systemctl reload nginx"
-echo "  6. systemctl start stravolt"
+green "✓ Done."
