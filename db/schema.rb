@@ -11,9 +11,6 @@
 # It's strongly recommended that you check this file into your version control system.
 
 ActiveRecord::Schema[8.1].define(version: 2026_01_25_235939) do
-  # These are extensions that must be enabled in order to support this database
-  enable_extension "pg_catalog.plpgsql"
-
   create_table "intervals", force: :cascade do |t|
     t.decimal "battery_percent", precision: 5, scale: 2
     t.datetime "created_at", null: false
@@ -75,11 +72,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_25_235939) do
 
   create_table "vehicles", force: :cascade do |t|
     t.bigint "active_trip_id"
-    t.jsonb "cached_data", default: {}
+    t.text "cached_data", default: "{}"
     t.datetime "created_at", null: false
     t.string "display_name"
     t.boolean "telemetry_active", default: false
-    t.jsonb "telemetry_config"
+    t.text "telemetry_config"
     t.datetime "telemetry_configured_at"
     t.boolean "telemetry_synced", default: false
     t.string "tesla_vehicle_id", null: false

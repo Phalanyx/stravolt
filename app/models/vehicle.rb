@@ -3,6 +3,9 @@ class Vehicle < ApplicationRecord
   has_many :trips, dependent: :destroy
   belongs_to :active_trip, class_name: 'Trip', optional: true
 
+  serialize :cached_data, coder: JSON
+  serialize :telemetry_config, coder: JSON
+
   validates :tesla_vehicle_id, presence: true, uniqueness: { scope: :user_id }
   validates :vin, presence: true, format: { with: /\A[A-HJ-NPR-Z0-9]{17}\z/ }
   validates :user, presence: true

@@ -8,40 +8,14 @@ services:
       - "3000:80"
     environment:
       RAILS_ENV: production
-      DATABASE_URL: postgresql://postgres@postgres:5432/stravolt_production
-      DB_HOST: postgres
-      DB_PORT: "5432"
-      DB_USERNAME: postgres
       TESLA_PROXY_URL: https://tesla_http_proxy:4443
     env_file:
       - .env
+    volumes:
+      - sqlite_db:/rails/db
     depends_on:
-      - postgres
       - redis
     restart: unless-stopped
-
-  postgres:
-    # this image is just postgres with pgvector installed
-    image: pgvector/pgvector:pg16
-    ports:
-      - 5433:5432
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_DB: stravolt_development
-      POSTGRES_HOST_AUTH_METHOD: trust
-  redis:
-    image: library/redis:7-alpine
-    ports:
-      - 6379:6379
-
-  # cloudflared:
-  #   image: cloudflare/cloudflared:latest
-  #   command: tunnel --no-autoupdate run
-  #   environment:
-  #     - TUNNEL_TOKEN=${TUNNEL_TOKEN}
-  #   depends_on:
-  #     - web
-  #   restart: unless-stopped
 
   tesla_http_proxy:
     image: tesla/vehicle-command:latest
@@ -59,16 +33,18 @@ services:
       - no-new-privileges:true
     volumes:
       - ./vehicle-command/config:/config
-  
-  # app:
-  #   build:
-  #     context: ./fleet-telemetry
-  #   ports:
-  #     - 0.0.0.0:443:443
-  #   volumes:
-  #     - /root/certs:/config
-  #     - ./config.json:/etc/fleet-telemetry/config.json
-  #   environment:
-  #     - STRAVOLT_API_ENDPOINT
-  #     - STRAVOLT_BEARER_TOKEN
 
+  app:
+    build:
+      context: ./fleet-telemetry
+    ports:
+      - 0.0.0.0:443:443
+    volumes:
+      - /root/certs:/config
+      - ./config.json:/etc/fleet-telemetry/config.json
+    environment:
+      - STRAVOLT_API_ENDPOINT
+      - STRAVOLT_BEARER_TOKEN
+
+volumes:
+  sqlite_db:

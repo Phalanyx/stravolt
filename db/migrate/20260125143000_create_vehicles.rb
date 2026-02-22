@@ -5,9 +5,9 @@ class CreateVehicles < ActiveRecord::Migration[7.0]
       t.string :tesla_vehicle_id, null: false, index: true
       t.string :vin, null: false, index: true
       t.string :display_name
-      t.jsonb :cached_data, default: {}
+      t.text :cached_data, default: '{}'
       t.boolean :telemetry_active, default: false
-      t.jsonb :telemetry_config
+      t.text :telemetry_config
       t.datetime :telemetry_configured_at
       t.boolean :telemetry_synced, default: false
 
