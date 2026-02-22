@@ -35,25 +35,25 @@ if [ ! -d "$RBENV_ROOT" ]; then
   git clone https://github.com/rbenv/ruby-build.git "$RBENV_ROOT/plugins/ruby-build"
 fi
 
-PROFILE="/root/.bashrc"
-grep -qxF 'export PATH="$HOME/.rbenv/bin:$PATH"' "$PROFILE" || \
-  echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> "$PROFILE"
-grep -qxF 'eval "$(rbenv init -)"' "$PROFILE" || \
-  echo 'eval "$(rbenv init -)"' >> "$PROFILE"
+# PROFILE="/root/.bashrc"
+# grep -qxF 'export PATH="$HOME/.rbenv/bin:$PATH"' "$PROFILE" || \
+#   echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> "$PROFILE"
+# grep -qxF 'eval "$(rbenv init -)"' "$PROFILE" || \
+#   echo 'eval "$(rbenv init -)"' >> "$PROFILE"
 
-export PATH="$RBENV_ROOT/bin:$PATH"
-eval "$($RBENV_ROOT/bin/rbenv init -)"
+# export PATH="$RBENV_ROOT/bin:$PATH"
+# eval "$($RBENV_ROOT/bin/rbenv init -)"
 
-if ! rbenv versions --bare | grep -q "^${RUBY_VERSION}$"; then
-  step "Compiling Ruby $RUBY_VERSION (this takes a few minutes)"
-  rbenv install "$RUBY_VERSION"
-fi
+# if ! rbenv versions --bare | grep -q "^${RUBY_VERSION}$"; then
+#   step "Compiling Ruby $RUBY_VERSION (this takes a few minutes)"
+#   rbenv install "$RUBY_VERSION"
+# fi
 
-rbenv global "$RUBY_VERSION"
+# rbenv global "$RUBY_VERSION"
 
-# ── 3. Bundler ────────────────────────────────────────────────────────────────
-step "Installing Bundler"
-"$RBENV_ROOT/shims/gem" install bundler --no-document
+# # ── 3. Bundler ────────────────────────────────────────────────────────────────
+# step "Installing Bundler"
+# "$RBENV_ROOT/shims/gem" install bundler --no-document
 
 # ── 4. Systemd service ────────────────────────────────────────────────────────
 step "Installing systemd service"
