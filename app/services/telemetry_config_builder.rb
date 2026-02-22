@@ -5,7 +5,7 @@ class TelemetryConfigBuilder
       "config" => {
         "hostname" => "telemetry.stravolt.com",
         "port" => 443,
-        "ca" => ENV['TELEMETRY_CHAIN'], # Certificate chain from environment
+        "ca" => ENV['TELEMETRY_CHAIN']&.gsub('\n', "\n"), # Certificate chain from environment
         "fields" => {
           # Gear state (Drive/Park/Reverse/Neutral) - triggers on state changes
           "Gear" => { "interval_seconds" => 1 },
