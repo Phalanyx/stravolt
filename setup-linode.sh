@@ -3,7 +3,7 @@
 # Run as root: bash setup-linode.sh
 set -euo pipefail
 
-APP_DIR="$(pwd)"
+APP_DIR="/root/stravolt"
 RUBY_VERSION="3.4.8"
 RBENV_ROOT="/root/.rbenv"
 
@@ -35,25 +35,25 @@ if [ ! -d "$RBENV_ROOT" ]; then
   git clone https://github.com/rbenv/ruby-build.git "$RBENV_ROOT/plugins/ruby-build"
 fi
 
-# PROFILE="/root/.bashrc"
-# grep -qxF 'export PATH="$HOME/.rbenv/bin:$PATH"' "$PROFILE" || \
-#   echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> "$PROFILE"
-# grep -qxF 'eval "$(rbenv init -)"' "$PROFILE" || \
-#   echo 'eval "$(rbenv init -)"' >> "$PROFILE"
+PROFILE="/root/.bashrc"
+grep -qxF 'export PATH="$HOME/.rbenv/bin:$PATH"' "$PROFILE" || \
+  echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> "$PROFILE"
+grep -qxF 'eval "$(rbenv init -)"' "$PROFILE" || \
+  echo 'eval "$(rbenv init -)"' >> "$PROFILE"
 
-# export PATH="$RBENV_ROOT/bin:$PATH"
-# eval "$($RBENV_ROOT/bin/rbenv init -)"
+export PATH="$RBENV_ROOT/bin:$PATH"
+eval "$($RBENV_ROOT/bin/rbenv init -)"
 
-# if ! rbenv versions --bare | grep -q "^${RUBY_VERSION}$"; then
-#   step "Compiling Ruby $RUBY_VERSION (this takes a few minutes)"
-#   rbenv install "$RUBY_VERSION"
-# fi
+if ! rbenv versions --bare | grep -q "^${RUBY_VERSION}$"; then
+  step "Compiling Ruby $RUBY_VERSION (this takes a few minutes)"
+  rbenv install "$RUBY_VERSION"
+fi
 
-# rbenv global "$RUBY_VERSION"
+rbenv global "$RUBY_VERSION"
 
-# # ── 3. Bundler ────────────────────────────────────────────────────────────────
-# step "Installing Bundler"
-# "$RBENV_ROOT/shims/gem" install bundler --no-document
+# ── 3. Bundler ────────────────────────────────────────────────────────────────
+step "Installing Bundler"
+"$RBENV_ROOT/shims/gem" install bundler --no-document
 
 # ── 4. Systemd service ────────────────────────────────────────────────────────
 step "Installing systemd service"
@@ -84,7 +84,8 @@ systemctl enable stravolt
 
 # ── 5. Bundle install ─────────────────────────────────────────────────────────
 step "Installing gems"
-"$RBENV_ROOT/shims/bundle" install --without development test
+export BUNDLE_WITHOUT="development:test"
+"$RBENV_ROOT/shims/bundle" install
 
 # ── 6. Precompile assets ──────────────────────────────────────────────────────
 step "Precompiling assets"
@@ -96,7 +97,7 @@ RAILS_ENV=production "$RBENV_ROOT/shims/bundle" exec rails db:migrate
 
 # ── 8. Nginx ──────────────────────────────────────────────────────────────────
 step "Configuring nginx"
-cp nginx.conf /etc/nginx/sites-available/stravolt
+cp "$APP_DIR/nginx.conf" /etc/nginx/sites-available/stravolt
 ln -sf /etc/nginx/sites-available/stravolt /etc/nginx/sites-enabled/stravolt
 rm -f /etc/nginx/sites-enabled/default
 nginx -t && systemctl reload nginx
