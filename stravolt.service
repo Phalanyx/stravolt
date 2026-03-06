@@ -1,0 +1,19 @@
+[Unit]
+Description=Stravolt Rails App
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/stravolt
+Environment=RAILS_ENV=production
+EnvironmentFile=/root/stravolt/.env
+ExecStart=/usr/local/bin/bundle exec rails server -p 3000 -b 127.0.0.1
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=stravolt
+
+[Install]
+WantedBy=multi-user.target
