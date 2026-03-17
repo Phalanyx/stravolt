@@ -40,9 +40,8 @@ services:
     volumes:
       - /root/certs:/config
       - /root/config.json:/etc/fleet-telemetry/config.json
-    environment:
-      - STRAVOLT_API_ENDPOINT
-      - STRAVOLT_BEARER_TOKEN
+    env_file:
+      - .env
 
 volumes:
   sqlite_db:
