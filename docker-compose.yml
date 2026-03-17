@@ -36,7 +36,7 @@ services:
     build:
       context: ./fleet-telemetry
     ports:
-      - 0.0.0.0:443:443
+      - 0.0.0.0:4444:443
     volumes:
       - /root/certs:/config
       - /root/config.json:/etc/fleet-telemetry/config.json
