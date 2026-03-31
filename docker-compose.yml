@@ -1,5 +1,4 @@
 services:
-
   # web:
   #   build:
   #     context: .
@@ -38,8 +37,8 @@ services:
     ports:
       - 0.0.0.0:4444:443
     volumes:
-      - /root/certs:/config
-      - /root/config.json:/etc/fleet-telemetry/config.json
+      - /home/ubuntu/stravoltcerts:/config
+      - /home/ubuntu/stravoltconfig.json:/etc/fleet-telemetry/config.json
     env_file:
       - .env
 
