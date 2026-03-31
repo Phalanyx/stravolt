@@ -1,0 +1,23 @@
+{
+    "host": "0.0.0.0",
+    "hostname": "telemetry.stravolt.com",
+    "port": 443,
+    "log_level": "debug",
+    "json_log_enable": true,
+    "namespace": "telemetry",
+    "reliable_ack": false,
+    "rate_limit": {
+      "enabled": false,
+      "message_limit": 100
+    },
+    "records": {
+      "alerts": ["logger"],
+      "errors": ["logger"],
+      "V": ["logger"]
+    },
+    "tls": {
+      "server_cert": "/config/0000_cert.pem",
+      "server_key": "/config/private_key.pem"
+    },
+    "ca": "-----BEGIN CERTIFICATE-----\nyour_certificate_chain_here\n-----END CERTIFICATE-----"
+  }

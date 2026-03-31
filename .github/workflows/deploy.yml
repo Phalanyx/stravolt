@@ -1,0 +1,24 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.LINODE_HOST }}
+          username: root
+          key: ${{ secrets.LINODE_SSH_KEY }}
+          script: |
+            cd /root/stravolt
+            git pull origin main
+            bundle install --without development test
+            RAILS_ENV=production bundle exec rails db:migrate
+            RAILS_ENV=production bundle exec rails assets:precompile
+            systemctl restart stravolt
