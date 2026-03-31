@@ -45,3 +45,4 @@
 *.sqlite3**
 
 **/*.pem
+backup/

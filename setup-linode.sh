@@ -1,12 +1,44 @@
 #!/usr/bin/env bash
-# Setup script for Stravolt on a fresh Linode (Ubuntu 22.04 / 24.04)
-# Run as root: bash setup-linode.sh
+# Setup script for Stravolt on a fresh Oracle Cloud / Ubuntu server
+# Run as root from the app directory: bash setup-linode.sh
 set -euo pipefail
 
 APP_DIR="$(pwd)"
 
-green() { echo -e "\033[32m$*\033[0m"; }
-step()  { echo; green "==> $*"; }
+green()  { echo -e "\033[32m$*\033[0m"; }
+yellow() { echo -e "\033[33m$*\033[0m"; }
+step()   { echo; green "==> $*"; }
+
+# ── Certificate & Key Checklist ───────────────────────────────────────────────
+# Before running this script, ensure the following files are in place.
+# The script will check for them in step 10 and refuse to start Docker if any
+# are missing.
+#
+# ┌──────────────────────────────────────────────────────────────────────────┐
+# │  SERVICE             │ FILE                                    │ HOW      │
+# ├──────────────────────────────────────────────────────────────────────────┤
+# │  tesla_http_proxy    │ vehicle-command/config/tls-cert.pem     │ generate │
+# │  tesla_http_proxy    │ vehicle-command/config/tls-key.pem      │ generate │
+# │  tesla_http_proxy    │ vehicle-command/config/fleet-key.pem    │ generate │
+# │  Rails (.well-known) │ $APP_DIR/public-key.pem                 │ generate │
+# └──────────────────────────────────────────────────────────────────────────┘
+#
+# NOTE: fleet-telemetry (app service) has a tls block in config.json but it
+# may not be active — the cert paths in config.json reference host-level paths
+# that aren't mounted into the container. Verify separately if needed.
+#
+# Generation commands:
+#   # TLS cert + key (tesla_http_proxy self-signed):
+#   cd vehicle-command
+#   go run ./cmd/tls-keygen -cert config/tls-cert.pem -key config/tls-key.pem
+#
+#   # Fleet signing key (vehicle command authentication):
+#   go run ./cmd/tesla-keygen -keyring-type file config/fleet-key.pem
+#
+#   # Rails public key (Tesla .well-known endpoint):
+#   # Copy the public half of fleet-key.pem to $APP_DIR/public-key.pem
+#   cp vehicle-command/config/fleet-key.pem $APP_DIR/public-key.pem
+# ─────────────────────────────────────────────────────────────────────────────
 
 # ── 1. System packages ────────────────────────────────────────────────────────
 step "Installing system packages"
@@ -115,41 +147,43 @@ systemctl start stravolt
 # ── 10. Docker services (tesla_http_proxy + fleet-telemetry) ──────────────────
 step "Starting Docker services"
 
-# Check that required TLS and fleet keys exist before starting
+# Check that ALL required certs and keys are in place before starting Docker
 VEHICLE_CMD_CONFIG="$APP_DIR/vehicle-command/config"
 FLEET_TELEMETRY_CERTS="/home/ubuntu/certs"
+FLEET_TELEMETRY_CONFIG="/home/ubuntu/config"
 
 missing_files=0
-for f in "$VEHICLE_CMD_CONFIG/tls-cert.pem" "$VEHICLE_CMD_CONFIG/tls-key.pem" "$VEHICLE_CMD_CONFIG/fleet-key.pem"; do
-  if [ ! -f "$f" ]; then
-    echo "  ✗ Missing: $f" >&2
+check_file() {
+  if [ ! -f "$1" ]; then
+    yellow "  [ ] Missing: $1"
     missing_files=1
+  else
+    green  "  [✓] Found:   $1"
   fi
-done
-for f in "$FLEET_TELEMETRY_CERTS/tls-cert.pem" "$FLEET_TELEMETRY_CERTS/tls-key.pem"; do
-  if [ ! -f "$f" ]; then
-    echo "  ✗ Missing: $f" >&2
-    missing_files=1
-  fi
-done
+}
+
+echo
+echo "Certificate / Key Checklist:"
+# tesla_http_proxy (required)
+check_file "$VEHICLE_CMD_CONFIG/tls-cert.pem"
+check_file "$VEHICLE_CMD_CONFIG/tls-key.pem"
+check_file "$VEHICLE_CMD_CONFIG/fleet-key.pem"
+# Rails .well-known public key endpoint (required)
+check_file "$APP_DIR/public-key.pem"
+# fleet-telemetry TLS (advisory — may not be active, verify config.json paths)
+if [ -d "/home/ubuntu/certs" ] && ls /home/ubuntu/certs/*.pem &>/dev/null; then
+  green "  [✓] Found:   /home/ubuntu/certs/*.pem (fleet-telemetry certs)"
+else
+  yellow "  [?] Advisory: /home/ubuntu/certs/ has no .pem files (fleet-telemetry TLS may be inactive)"
+fi
 
 if [ "$missing_files" -eq 1 ]; then
   echo >&2
-  echo "  ⚠ Docker services NOT started. Generate and copy the required keys first:" >&2
-  echo >&2
-  echo "  # Generate TLS cert + key for tesla_http_proxy:" >&2
-  echo "  cd \$APP_DIR/vehicle-command" >&2
-  echo "  go run ./cmd/tls-keygen -cert config/tls-cert.pem -key config/tls-key.pem" >&2
-  echo >&2
-  echo "  # Generate fleet private key for vehicle command signing:" >&2
-  echo "  go run ./cmd/tesla-keygen -keyring-type file config/fleet-key.pem" >&2
-  echo >&2
-  echo "  # Copy TLS certs for fleet-telemetry (app service):" >&2
-  echo "  cp $VEHICLE_CMD_CONFIG/tls-cert.pem $FLEET_TELEMETRY_CERTS/tls-cert.pem" >&2
-  echo "  cp $VEHICLE_CMD_CONFIG/tls-key.pem  $FLEET_TELEMETRY_CERTS/tls-key.pem" >&2
-  echo >&2
-  echo "  Then re-run: cd $APP_DIR && docker compose up -d" >&2
+  yellow "  ⚠ Docker services NOT started — missing files above." >&2
+  echo   "  See the checklist at the top of this script for generation commands." >&2
+  echo   "  Once all files are in place, run: cd $APP_DIR && docker compose up -d" >&2
 else
+  green "  All certs present — starting Docker services."
   cd "$APP_DIR"
   docker compose up -d
 fi
