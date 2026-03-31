@@ -12,13 +12,13 @@ jobs:
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
-          host: ${{ secrets.LINODE_HOST }}
-          username: root
-          key: ${{ secrets.LINODE_SSH_KEY }}
+          host: ${{ secrets.ORACLE_CLOUD_HOST }}
+          username: ubuntu
+          key: ${{ secrets.ORACLE_CLOUD_SSH_KEY }}
           script: |
-            cd /root/stravolt
+            cd /home/ubuntu/stravolt
             git pull origin main
             bundle install --without development test
             RAILS_ENV=production bundle exec rails db:migrate
             RAILS_ENV=production bundle exec rails assets:precompile
-            systemctl restart stravolt
+            sudo systemctl restart stravolt
