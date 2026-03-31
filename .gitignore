@@ -36,6 +36,9 @@
 # Ignore Tesla EC private key
 /private-key.pem
 
+# Ignore telemetry config (contains certs)
+/config.json
+
 
 /app/assets/builds/*
 !/app/assets/builds/.keep
