@@ -6,6 +6,12 @@ module Api
 
       # POST /api/v1/telemetry/ingest
       def ingest
+        TelemetryLog.create!(
+          vin: telemetry_params[:vin],
+          metadata: telemetry_params[:metadata],
+          data: telemetry_params[:data]
+        )
+
         service = TelemetryIngestService.new(telemetry_params)
         result = service.process
 
