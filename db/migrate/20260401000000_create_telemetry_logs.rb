@@ -2,8 +2,8 @@ class CreateTelemetryLogs < ActiveRecord::Migration[8.0]
   def change
     create_table :telemetry_logs do |t|
       t.string :vin, null: false
-      t.jsonb :metadata
-      t.jsonb :data
+      t.text :metadata
+      t.text :data
 
       t.timestamps
     end
