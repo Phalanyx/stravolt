@@ -94,6 +94,27 @@ class TelemetryProxyClient
     raise ApiUnavailableError, "Tesla API is temporarily unavailable"
   end
 
+  # POST start climate preconditioning
+  def start_preconditioning(vehicle)
+    token = ensure_token
+
+    response = connection.post("/api/1/vehicles/#{vehicle.vin}/command/auto_conditioning_start") do |req|
+      req.headers["Authorization"] = "Bearer #{token}"
+      req.headers["Content-Type"] = "application/json"
+    end
+
+    if response.status == 200
+      Rails.logger.info("Vehicle #{vehicle.vin} preconditioning started successfully")
+      true
+    else
+      Rails.logger.warn("Failed to start preconditioning for #{vehicle.vin}: #{response.status} - #{response.body}")
+      false
+    end
+  rescue Faraday::Error => e
+    Rails.logger.error("Error starting vehicle preconditioning: #{e.message}")
+    false
+  end
+
   # POST wake up vehicle
   def wake_up(vehicle_id)
     token = ensure_token
