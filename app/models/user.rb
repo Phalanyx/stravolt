@@ -7,7 +7,8 @@ class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable
+         # :recoverable,
+         :rememberable, :validatable
 
   # Encrypt Tesla tokens using Rails 8 built-in encryption
   encrypts :access_token, :refresh_token
