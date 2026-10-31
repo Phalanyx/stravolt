@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_25_235939) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_000000) do
   create_table "intervals", force: :cascade do |t|
     t.decimal "battery_percent", precision: 5, scale: 2
     t.datetime "created_at", null: false
@@ -26,6 +26,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_25_235939) do
     t.index ["trip_id", "recorded_at"], name: "index_intervals_on_trip_and_recorded_at_unique", unique: true
     t.index ["trip_id", "recorded_at"], name: "index_intervals_on_trip_id_and_recorded_at"
     t.index ["trip_id"], name: "index_intervals_on_trip_id"
+  end
+
+  create_table "telemetry_logs", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "data"
+    t.text "metadata"
+    t.datetime "updated_at", null: false
+    t.string "vin", null: false
+    t.index ["vin"], name: "index_telemetry_logs_on_vin"
   end
 
   create_table "trips", force: :cascade do |t|
@@ -75,6 +84,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_25_235939) do
     t.text "cached_data", default: "{}"
     t.datetime "created_at", null: false
     t.string "display_name"
+    t.string "last_gear"
     t.boolean "telemetry_active", default: false
     t.text "telemetry_config"
     t.datetime "telemetry_configured_at"
