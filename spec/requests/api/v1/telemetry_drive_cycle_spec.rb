@@ -196,4 +196,34 @@ RSpec.describe "Telemetry drive cycle integration", type: :request do
       end
     end
   end
+
+  # ---------------------------------------------------------------------------
+  # Parked across multiple frames
+  # ---------------------------------------------------------------------------
+  # A parked car keeps streaming telemetry. Only the first parked frame should
+  # create a parked-snapshot trip; subsequent parked frames must be no-ops.
+  describe "parked across multiple consecutive frames" do
+    before do
+      3.times do |i|
+        post_event(
+          gear: "<invalid>",
+          lat: 43.906558, lon: -78.712022,
+          battery: 98.0, speed: 0,
+          offset_seconds: i * 30
+        )
+      end
+    end
+
+    it "creates exactly one parked-snapshot trip" do
+      expect(vehicle.reload.trips.count).to eq(1)
+    end
+
+    it "leaves the vehicle with no active trip" do
+      expect(vehicle.reload.active_trip).to be_nil
+    end
+
+    it "records the vehicle's last gear as parked" do
+      expect(vehicle.reload.last_gear).to eq("<invalid>")
+    end
+  end
 end

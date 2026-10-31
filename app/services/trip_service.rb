@@ -1,4 +1,6 @@
 class TripService
+  DRIVING_GEARS = %w[D R N].freeze
+
   def initialize(vehicle, gear:, location:, battery:, speed:, timestamp:)
     @vehicle   = vehicle
     @gear      = gear
@@ -10,9 +12,9 @@ class TripService
 
   def process
     if parked?
-      @vehicle.has_active_trip? ? complete_trip : create_empty_trip
+      handle_parked
     elsif driving?
-      @vehicle.has_active_trip? ? add_interval : start_trip
+      handle_driving
     else
       { success: true, message: "Skipped: unrecognized gear state" }
     end
@@ -25,7 +27,41 @@ class TripService
   end
 
   def driving?
-    %w[D R N].include?(@gear.to_s.upcase)
+    DRIVING_GEARS.include?(@gear.to_s.upcase)
+  end
+
+  def handle_parked
+    if @vehicle.has_active_trip?
+      record_gear
+      return complete_trip
+    end
+
+    # Only create a parked snapshot when transitioning into park. A car streams
+    # telemetry continuously while parked, so consecutive parked frames must not
+    # mint a new empty trip each time.
+    unless parked_transition?
+      record_gear
+      return { success: true, message: "Skipped: already parked" }
+    end
+
+    record_gear
+    create_empty_trip
+  end
+
+  def handle_driving
+    record_gear
+    @vehicle.has_active_trip? ? add_interval : start_trip
+  end
+
+  def parked_transition?
+    @vehicle.last_gear.nil? || DRIVING_GEARS.include?(@vehicle.last_gear.to_s.upcase)
+  end
+
+  def record_gear
+    normalized = @gear.to_s
+    return if @vehicle.last_gear == normalized
+
+    @vehicle.update!(last_gear: normalized)
   end
 
   def complete_trip
